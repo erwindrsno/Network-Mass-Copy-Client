@@ -1,4 +1,4 @@
-package ws.client;
+package org.example;
 
 import java.nio.file.attribute.AclEntryPermission;
 import java.util.Set;
@@ -6,7 +6,7 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class FileMetadata{
+public class FileMetadata {
     long fileSize;
     long chunkSize;
 
@@ -16,13 +16,12 @@ public class FileMetadata{
     Set<AclEntryPermission> aclEntry;
 
     public FileMetadata(
-        @JsonProperty("fileSize") long fileSize, 
-        @JsonProperty("chunkSize") long chunkSize,
-        @JsonProperty("fileName") String fileName, 
-        @JsonProperty("user") String user,
-        @JsonProperty("signature") String signature,
-        @JsonProperty("aclEntry") Set<AclEntryPermission> aclEntry
-    ){
+            @JsonProperty("fileSize") long fileSize,
+            @JsonProperty("chunkSize") long chunkSize,
+            @JsonProperty("fileName") String fileName,
+            @JsonProperty("user") String user,
+            @JsonProperty("signature") String signature,
+            @JsonProperty("aclEntry") Set<AclEntryPermission> aclEntry) {
         this.fileSize = fileSize;
         this.chunkSize = chunkSize;
         this.fileName = fileName;
@@ -35,15 +34,15 @@ public class FileMetadata{
         return this.fileSize;
     }
 
-    public void setFileSize(long fileSize){
+    public void setFileSize(long fileSize) {
         this.fileSize = fileSize;
     }
 
-    public long getChunkSize(){
+    public long getChunkSize() {
         return this.chunkSize;
     }
 
-    public void setChunkSize(long chunkSize){
+    public void setChunkSize(long chunkSize) {
         this.chunkSize = chunkSize;
     }
 
@@ -63,19 +62,19 @@ public class FileMetadata{
         this.user = user;
     }
 
-    public String getSignature(){
+    public String getSignature() {
         return this.signature;
     }
 
-    public void setSignature(String signature){
+    public void setSignature(String signature) {
         this.signature = signature;
     }
 
-    public Set<AclEntryPermission> getAclEntry(){
+    public Set<AclEntryPermission> getAclEntry() {
         return this.aclEntry;
     }
 
-    public void setAclEntry(Set<AclEntryPermission> aclEntry){
+    public void setAclEntry(Set<AclEntryPermission> aclEntry) {
         this.aclEntry = aclEntry;
     }
 }

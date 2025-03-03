@@ -1,4 +1,4 @@
-package ws.client;
+package org.example;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileOutputStream;
@@ -35,7 +35,7 @@ public class Client extends WebSocketClient {
 
     boolean readyToReceiveFile = false;
 
-    byte[] fileBytes; //complete file in bytes
+    byte[] fileBytes; // complete file in bytes
     int currIdx = 0;
     long fileSize;
     long chunkSize;
@@ -56,44 +56,43 @@ public class Client extends WebSocketClient {
     }
 
     @Override
-    public void onMessage(String message){
-        if(message.equals("PING")){
+    public void onMessage(String message) {
+        if (message.equals("PING")) {
             send("PONG");
-        }
-        else if(message.startsWith("FILE-METADATA~")){
-            try{
+        } else if (message.startsWith("FILE-METADATA~")) {
+            try {
                 fos = new FileOutputStream(toBeReceived.toFile());
-            } catch (Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
-            String json = message.substring(message.indexOf('~')+1);
+            String json = message.substring(message.indexOf('~') + 1);
             ObjectMapper mapper = new ObjectMapper();
-            try{
+            try {
                 this.fileMetadata = mapper.readValue(json, FileMetadata.class);
                 this.fileSize = this.fileMetadata.getFileSize();
                 // this.chunkSize = this.fileMetadata.getChunkSize();
-                this.fileBytes = new byte[(int)this.fileSize];
+                this.fileBytes = new byte[(int) this.fileSize];
                 this.readyToReceiveFile = true;
                 logger.info("RECEIVED META DATA");
                 send("READY-FILE~");
-            } catch(Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
     }
-    
+
     @Override
     public void onMessage(ByteBuffer buffer) {
         if (this.readyToReceiveFile) {
-            try{
+            try {
                 byte[] data = new byte[buffer.remaining()];
-        
+
                 buffer.get(data);
 
                 System.arraycopy(data, 0, fileBytes, currIdx, data.length);
                 this.currIdx += data.length;
 
-                if(this.currIdx == fileBytes.length){
+                if (this.currIdx == fileBytes.length) {
                     fos.write(fileBytes);
                     fos.close();
 
@@ -104,7 +103,7 @@ public class Client extends WebSocketClient {
 
                     send("FINISH-FILE~");
                 }
-            } catch(Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -120,20 +119,19 @@ public class Client extends WebSocketClient {
         System.err.println("an error occurred:" + ex);
     }
 
-    public void validateFileAndHandleAcl(){
-        try{
+    public void validateFileAndHandleAcl() {
+        try {
             Path filePath = Paths.get(this.fileMetadata.getFileName());
             String user = this.fileMetadata.getUser();
             String signature = this.fileMetadata.getSignature();
-    
+
             Set<AclEntryPermission> permissions = this.fileMetadata.getAclEntry();
-    
+
             String hashedClient = Hashing.sha256().hashBytes(fileBytes).toString();
-    
-            if(hashedClient.equals(signature)){
+
+            if (hashedClient.equals(signature)) {
                 logger.info("FILE VERIFIED");
-            }
-            else{
+            } else {
                 toBeReceived.toFile().delete();
                 logger.info("FILE CORRUPTED");
                 return;
@@ -141,30 +139,34 @@ public class Client extends WebSocketClient {
             // file rename
             // sourcePath is created beforehand
             Files.move(toBeReceived, filePath, StandardCopyOption.REPLACE_EXISTING);
-    
-            UserPrincipal userPrincipal = filePath.getFileSystem().getUserPrincipalLookupService().lookupPrincipalByName(user);
-    
-            AclFileAttributeView aclView = Files.getFileAttributeView(filePath, AclFileAttributeView.class);
-    
-            AclEntry aclEntry = AclEntry.newBuilder()
-                .setType(AclEntryType.ALLOW)
-                .setPrincipal(userPrincipal)
-                .setFlags(AclEntryFlag.DIRECTORY_INHERIT, AclEntryFlag.FILE_INHERIT)
-                .setPermissions(permissions)
-                .build();
-    
-            List<AclEntry> acl = aclView.getAcl();
-            acl.add(0, aclEntry);
-            aclView.setAcl(acl);
+
+            // UserPrincipal userPrincipal =
+            // filePath.getFileSystem().getUserPrincipalLookupService()
+            // .lookupPrincipalByName(user);
+
+            // AclFileAttributeView aclView = Files.getFileAttributeView(filePath,
+            // AclFileAttributeView.class);
+
+            // AclEntry aclEntry = AclEntry.newBuilder()
+            // .setType(AclEntryType.ALLOW)
+            // .setPrincipal(userPrincipal)
+            // .setFlags(AclEntryFlag.DIRECTORY_INHERIT, AclEntryFlag.FILE_INHERIT)
+            // .setPermissions(permissions)
+            // .build();
+
+            // List<AclEntry> acl = aclView.getAcl();
+            // acl.add(0, aclEntry);
+            // aclView.setAcl(acl);
             logger.info("File received safely, phew");
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 }
 
 // Catatan Utama
-// - Mekanisme monitoring client sudah ada, dengan cara pinging. Tapi coba cara lain.
+// - Mekanisme monitoring client sudah ada, dengan cara pinging. Tapi coba cara
+// lain.
 // - Protocol SEND_FILE sudah ada, dan sudah coba implementasi.
 
 // Catanan Tugas
