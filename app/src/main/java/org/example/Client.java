@@ -112,7 +112,10 @@ public class Client extends WebSocketClient {
 
         if (this.currIdx == fileBytes.length) {
           logger.info("FINISHED YAY");
+
           fos.close();
+
+          logger.info("The file that copied has size : " + toBeReceived.toFile().length());
 
           this.readyToReceiveFile = false;
           this.currIdx = 0;
