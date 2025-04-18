@@ -106,18 +106,17 @@ public class Client extends WebSocketClient {
 
         buffer.get(data);
 
-        System.arraycopy(data, 0, fileBytes, currIdx, data.length);
+        // System.arraycopy(data, 0, fileBytes, currIdx, data.length);
         this.currIdx += data.length;
 
         logger
             .info("Chunk size : " + data.length + ", fileBytesLength: " + fileBytes.length + ", filled: " + currIdx);
 
-        fos.write(fileBytes);
+        fos.write(data);
 
         if (this.currIdx == fileBytes.length) {
-          logger.info("FINISHED YAY");
-
           fos.close();
+          logger.info("FINISHED YAY");
 
           logger.info("The file that copied has size : " + Files.size(toBeReceived));
 
