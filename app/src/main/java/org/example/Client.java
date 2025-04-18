@@ -109,7 +109,7 @@ public class Client extends WebSocketClient {
         System.arraycopy(data, 0, fileBytes, currIdx, data.length);
         this.currIdx += data.length;
 
-        logger.info("Chunk size : " + data.length);
+        logger.info("Chunk size : " + data.length + ", fileBytesLength: " + fileBytes.length);
 
         fos.write(fileBytes);
 
