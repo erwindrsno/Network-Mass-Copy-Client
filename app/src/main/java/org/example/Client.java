@@ -76,6 +76,7 @@ public class Client extends WebSocketClient {
         logger.info("RECEIVED META DATA");
         logger.info("File size is : " + this.fileSize);
         logger.info("chunk size is : " + this.chunkSize);
+        logger.info("file bytes length is : " + this.fileBytes.length);
         send("READY-FILE~");
       } catch (Exception e) {
         e.printStackTrace();
