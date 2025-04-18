@@ -70,10 +70,12 @@ public class Client extends WebSocketClient {
       try {
         this.fileMetadata = mapper.readValue(json, FileMetadata.class);
         this.fileSize = this.fileMetadata.getFileSize();
-        // this.chunkSize = this.fileMetadata.getChunkSize();
+        this.chunkSize = this.fileMetadata.getChunkSize();
         this.fileBytes = new byte[(int) this.fileSize];
         this.readyToReceiveFile = true;
         logger.info("RECEIVED META DATA");
+        logger.info("File size is : " + this.fileSize);
+        logger.info("chunk size is : " + this.chunkSize);
         send("READY-FILE~");
       } catch (Exception e) {
         e.printStackTrace();
@@ -109,6 +111,7 @@ public class Client extends WebSocketClient {
         fos.write(fileBytes);
 
         if (this.currIdx == fileBytes.length) {
+          logger.info("FINISHED YAY");
           fos.close();
 
           this.readyToReceiveFile = false;
