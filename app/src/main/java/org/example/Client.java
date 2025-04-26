@@ -84,7 +84,7 @@ public class Client extends WebSocketClient {
         logger.info("File size is : " + this.fileSize);
         logger.info("chunk size is : " + this.chunkSize);
         logger.info("chunk count is : " + this.chunkCount);
-        logger.info("file bytes length is : " + this.fileBytes.length);
+        // logger.info("file bytes length is : " + this.fileBytes.length);
         for (long i = 0; i < chunkCount; i++) {
           send("CHUNK-ID~" + i);
         }
