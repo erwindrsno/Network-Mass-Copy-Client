@@ -16,7 +16,9 @@ import java.nio.file.attribute.AclEntryType;
 import java.nio.file.attribute.AclFileAttributeView;
 import java.nio.file.attribute.UserPrincipal;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.java_websocket.client.WebSocketClient;
@@ -39,6 +41,10 @@ public class Client extends WebSocketClient {
   int currIdx = 0;
   long fileSize;
   long chunkSize;
+  long chunkCount;
+
+  Map<Integer, byte[]> bytesMap = new HashMap<>();
+  int bytesIdx = 0;
 
   FileMetadata fileMetadata;
 
@@ -71,13 +77,17 @@ public class Client extends WebSocketClient {
         this.fileMetadata = mapper.readValue(json, FileMetadata.class);
         this.fileSize = this.fileMetadata.getFileSize();
         this.chunkSize = this.fileMetadata.getChunkSize();
-        this.fileBytes = new byte[(int) this.fileSize];
+        this.chunkCount = this.fileMetadata.getChunkCount();
+        // this.fileBytes = new byte[(int) this.fileSize];
         this.readyToReceiveFile = true;
         logger.info("RECEIVED META DATA");
         logger.info("File size is : " + this.fileSize);
         logger.info("chunk size is : " + this.chunkSize);
+        logger.info("chunk count is : " + this.chunkCount);
         logger.info("file bytes length is : " + this.fileBytes.length);
-        send("READY-FILE~");
+        for (long i = 0; i < chunkCount; i++) {
+          send("CHUNK-ID~" + i);
+        }
       } catch (Exception e) {
         e.printStackTrace();
       }
@@ -102,35 +112,20 @@ public class Client extends WebSocketClient {
   public void onMessage(ByteBuffer buffer) {
     if (this.readyToReceiveFile) {
       try {
-        byte[] data = new byte[buffer.remaining()];
 
-        buffer.get(data);
-
-        // System.arraycopy(data, 0, fileBytes, currIdx, data.length);
-        this.currIdx += data.length;
-
-        logger
-            .info("Chunk size : " + data.length + ", fileBytesLength: " + fileBytes.length + ", filled: " + currIdx);
-
-        fos.write(data);
-
-        if (this.currIdx == fileBytes.length) {
-          fos.close();
-          logger.info("FINISHED YAY");
-
-          logger.info("The file that copied has size : " + Files.size(toBeReceived));
-
-          this.readyToReceiveFile = false;
-          this.currIdx = 0;
-
-          validateFileAndHandleAcl();
-
-          send("FINISH-FILE~");
+        byte[] data = buffer.array();
+        this.bytesMap.put(bytesIdx, data);
+        bytesIdx++;
+        if (bytesMap.size() == chunkCount) {
+          logger.info("File transfer successfully!");
+        } else {
+          logger.info("Receiving...");
         }
       } catch (Exception e) {
         e.printStackTrace();
       }
     }
+
   }
 
   @Override
