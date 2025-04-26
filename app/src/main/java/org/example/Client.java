@@ -118,6 +118,9 @@ public class Client extends WebSocketClient {
         bytesIdx++;
         if (bytesMap.size() == chunkCount) {
           logger.info("File transfer successfully!");
+          for (int i = 0; i < this.bytesMap.size(); i++) {
+            this.fos.write(this.bytesMap.get(i));
+          }
         } else {
           logger.info("Receiving...");
         }
