@@ -122,6 +122,7 @@ public class Client extends WebSocketClient {
             this.fos.write(this.bytesMap.get(i));
           }
           this.fos.close();
+          validateFileAndHandleAcl();
         } else {
           logger.info("Receiving...");
         }
