@@ -128,26 +128,28 @@ public class Client extends WebSocketClient {
         try {
           // Context context = mapper.readValue(json, Context.class);
           logger.info(json);
+          return;
 
           // this.listFileMetadata = metadata.getFileMetadataList();
           // this.listOfChunkMaps = new ArrayList<>();
           //
           // this.title = metadata.getTitle();
           // this.entryId = metadata.getEntryId();
-          Path dir = Paths.get("files/" + this.title);
-          Files.createDirectories(dir);
-
-          this.isFinished = false;
-
-          for (int i = 0; i < this.listFileMetadata.size(); i++) {
-            this.listOfChunkMaps.add(new HashMap<>());
-
-            Path toBeReceived = Paths.get("files/" + this.title + "/toBeReceived_" + i);
-            this.listPath.add(toBeReceived);
-            this.listFos.add(new FileOutputStream(toBeReceived.toFile()));
-          }
-
-          send("file~" + this.receiveFileCounter + "CHUNK-ID~" + this.receiveChunkCounter);
+          // Path dir = Paths.get("files/" + this.title);
+          // Files.createDirectories(dir);
+          //
+          // this.isFinished = false;
+          //
+          // for (int i = 0; i < this.listFileMetadata.size(); i++) {
+          // this.listOfChunkMaps.add(new HashMap<>());
+          //
+          // Path toBeReceived = Paths.get("files/" + this.title + "/toBeReceived_" + i);
+          // this.listPath.add(toBeReceived);
+          // this.listFos.add(new FileOutputStream(toBeReceived.toFile()));
+          // }
+          //
+          // send("file~" + this.receiveFileCounter + "CHUNK-ID~" +
+          // this.receiveChunkCounter);
 
         } catch (Exception e) {
           e.printStackTrace();
