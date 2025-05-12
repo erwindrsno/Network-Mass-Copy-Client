@@ -15,6 +15,7 @@ import java.nio.file.attribute.AclEntryPermission;
 import java.nio.file.attribute.AclEntryType;
 import java.nio.file.attribute.AclFileAttributeView;
 import java.nio.file.attribute.UserPrincipal;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +29,7 @@ import org.java_websocket.handshake.ServerHandshake;
 import org.slf4j.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.hash.Hashing;
 
 public class Client extends WebSocketClient {
@@ -48,6 +50,16 @@ public class Client extends WebSocketClient {
 
   FileMetadata fileMetadata;
 
+  private List<FileMetadata> listFileMetadata;
+  private List<Map<Integer, byte[]>> listOfChunkMaps;
+  private String title;
+  private Integer entryId;
+  List<Path> listPath = new ArrayList<>();
+  List<FileOutputStream> listFos = new ArrayList<>();
+  int receiveFileCounter = 0;
+  int receiveChunkCounter = 0;
+  boolean isFinished;
+
   public Client(URI serverUri, Draft draft) {
     super(serverUri, draft);
   }
@@ -63,6 +75,7 @@ public class Client extends WebSocketClient {
 
   @Override
   public void onMessage(String message) {
+    logger.info(message);
     if (message.equals("PING")) {
       send("PONG");
     } else if (message.startsWith("FILE-METADATA~")) {
@@ -105,32 +118,95 @@ public class Client extends WebSocketClient {
       } catch (Exception e) {
         logger.error(e.getMessage());
       }
+    } else if (message.startsWith("server/")) {
+      String httpMessage = message.substring(7);
+      logger.info("you maasuk bro");
+      if (httpMessage.startsWith("metadata/")) {
+        String json = httpMessage.substring(9);
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.enable(SerializationFeature.INDENT_OUTPUT); // pretty print
+        try {
+          // Context context = mapper.readValue(json, Context.class);
+          logger.info(json);
+
+          // this.listFileMetadata = metadata.getFileMetadataList();
+          // this.listOfChunkMaps = new ArrayList<>();
+          //
+          // this.title = metadata.getTitle();
+          // this.entryId = metadata.getEntryId();
+          Path dir = Paths.get("files/" + this.title);
+          Files.createDirectories(dir);
+
+          this.isFinished = false;
+
+          for (int i = 0; i < this.listFileMetadata.size(); i++) {
+            this.listOfChunkMaps.add(new HashMap<>());
+
+            Path toBeReceived = Paths.get("files/" + this.title + "/toBeReceived_" + i);
+            this.listPath.add(toBeReceived);
+            this.listFos.add(new FileOutputStream(toBeReceived.toFile()));
+          }
+
+          send("file~" + this.receiveFileCounter + "CHUNK-ID~" + this.receiveChunkCounter);
+
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
     }
   }
 
   @Override
   public void onMessage(ByteBuffer buffer) {
-    if (this.readyToReceiveFile) {
+    if (!this.isFinished) {
       try {
-
         byte[] data = buffer.array();
-        this.bytesMap.put(bytesIdx, data);
-        bytesIdx++;
-        if (bytesMap.size() == chunkCount) {
+        this.listOfChunkMaps.get(this.receiveFileCounter).put(this.receiveChunkCounter, data);
+        this.receiveChunkCounter++;
+        if (this.listOfChunkMaps.get(this.receiveFileCounter).size() == this.listFileMetadata
+            .get(this.receiveFileCounter)
+            .getChunkCount()) {
           logger.info("File transfer successfully!");
-          for (int i = 0; i < this.bytesMap.size(); i++) {
-            this.fos.write(this.bytesMap.get(i));
+
+          for (int i = 0; i < this.listOfChunkMaps.get(this.receiveFileCounter).size(); i++) {
+            this.listFos.get(this.receiveFileCounter).write(this.listOfChunkMaps.get(this.receiveFileCounter).get(i));
           }
-          this.fos.close();
-          validateFileAndHandleAcl();
+          this.listFos.get(receiveFileCounter).close();
+
+          String hashedClient = Hashing.sha256()
+              .hashBytes(Files.readAllBytes(this.listPath.get(this.receiveFileCounter)))
+              .toString();
+
+          if (hashedClient.equals(this.listFileMetadata.get(this.receiveFileCounter).getSignature())) {
+            logger.info("FILE VERIFIED");
+          } else {
+            this.listPath.get(this.receiveFileCounter).toFile().delete();
+            logger.info("FILE CORRUPTED");
+          }
+          Path newname = Paths
+              .get("files/" + this.title + "/" + this.listFileMetadata.get(this.receiveFileCounter).getFileName());
+          logger.info(this.listFileMetadata.get(this.receiveFileCounter).getFileName());
+          Files.move(this.listPath.get(this.receiveFileCounter), newname, StandardCopyOption.REPLACE_EXISTING);
+
+          this.receiveChunkCounter = 0;
+          this.receiveFileCounter++;
+          if (this.receiveFileCounter < this.listOfChunkMaps.size()) {
+            send("file~" + this.receiveFileCounter + "CHUNK-ID~" + this.receiveChunkCounter);
+          } else if (this.receiveFileCounter == this.listOfChunkMaps.size() - 1) {
+            logger.info("ALL FILES RECEVIED.");
+            this.isFinished = true;
+            // this.clearAllListAndMap();
+          }
         } else {
-          logger.info("Receiving...");
+          if (this.receiveFileCounter < this.listOfChunkMaps.size()) {
+            send("file~" + this.receiveFileCounter + "CHUNK-ID~" + this.receiveChunkCounter);
+            logger.info("Receiving...");
+          }
         }
       } catch (Exception e) {
         e.printStackTrace();
       }
     }
-
   }
 
   @Override
@@ -146,7 +222,7 @@ public class Client extends WebSocketClient {
   public void validateFileAndHandleAcl() {
     try {
       Path filePath = Paths.get(this.fileMetadata.getFileName());
-      String user = this.fileMetadata.getUser();
+      // String user = this.fileMetadata.getUser();
       String signature = this.fileMetadata.getSignature();
 
       Set<AclEntryPermission> permissions = this.fileMetadata.getAclEntry();
@@ -185,6 +261,20 @@ public class Client extends WebSocketClient {
     } catch (Exception e) {
       e.printStackTrace();
     }
+  }
+
+  public void clearAllListAndMap() {
+    for (Map<Integer, byte[]> map : this.listOfChunkMaps) {
+      map.clear();
+    }
+    this.listOfChunkMaps.clear();
+    this.listFileMetadata.clear();
+    this.listPath.clear();
+    this.listFos.clear();
+    this.receiveFileCounter = 0;
+    this.receiveChunkCounter = 0;
+    this.entryId = null;
+    this.title = "";
   }
 }
 

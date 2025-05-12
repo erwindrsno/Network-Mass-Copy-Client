@@ -11,27 +11,55 @@ public class FileMetadata {
   long chunkSize;
   long chunkCount;
 
-  String fileName;
-  String user;
+  String filename;
+  String owner;
   String signature;
   Set<AclEntryPermission> aclEntry;
 
   public FileMetadata(
-      @JsonProperty("fileSize") long fileSize,
       @JsonProperty("chunkSize") long chunkSize,
       @JsonProperty("chunkCount") long chunkCount,
-      @JsonProperty("fileName") String fileName,
-      @JsonProperty("user") String user,
+      @JsonProperty("filename") String filename,
       @JsonProperty("signature") String signature,
-      @JsonProperty("aclEntry") Set<AclEntryPermission> aclEntry) {
-    this.fileSize = fileSize;
+      @JsonProperty("owner") String owner) {
     this.chunkSize = chunkSize;
     this.chunkCount = chunkCount;
-    this.fileName = fileName;
-    this.user = user;
+    this.filename = filename;
     this.signature = signature;
-    this.aclEntry = aclEntry;
+    this.owner = owner;
   }
+
+  // public FileMetadata(
+  // @JsonProperty("fileSize") long fileSize,
+  // @JsonProperty("chunkSize") long chunkSize,
+  // @JsonProperty("chunkCount") long chunkCount,
+  // @JsonProperty("filename") String filename,
+  // @JsonProperty("owner") String owner,
+  // @JsonProperty("signature") String signature,
+  // @JsonProperty("aclEntry") Set<AclEntryPermission> aclEntry) {
+  // this.fileSize = fileSize;
+  // this.chunkSize = chunkSize;
+  // this.chunkCount = chunkCount;
+  // this.filename = filename;
+  // this.owner = owner;
+  // this.signature = signature;
+  // this.aclEntry = aclEntry;
+  // }
+  //
+  // public FileMetadata(
+  // @JsonProperty("chunkSize") long chunkSize,
+  // @JsonProperty("chunkCount") long chunkCount,
+  // @JsonProperty("filename") String filename,
+  // @JsonProperty("owner") String owner,
+  // @JsonProperty("signature") String signature,
+  // @JsonProperty("aclEntry") Set<AclEntryPermission> aclEntry) {
+  // this.chunkSize = chunkSize;
+  // this.chunkCount = chunkCount;
+  // this.filename = filename;
+  // this.owner = owner;
+  // this.signature = signature;
+  // this.aclEntry = aclEntry;
+  // }
 
   public FileMetadata() {
 
@@ -62,19 +90,19 @@ public class FileMetadata {
   }
 
   public String getFileName() {
-    return this.fileName;
+    return this.filename;
   }
 
-  public void setFileName(String fileName) {
-    this.fileName = fileName;
+  public void setFileName(String filename) {
+    this.filename = filename;
   }
 
-  public String getUser() {
-    return this.user;
+  public String getOwner() {
+    return this.owner;
   }
 
-  public void setUser(String user) {
-    this.user = user;
+  public void setOwner(String owner) {
+    this.owner = owner;
   }
 
   public String getSignature() {
