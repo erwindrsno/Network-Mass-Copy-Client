@@ -72,10 +72,10 @@ public class ServerHandler
           this.listFcm.get(this.fileCounter).setMapOfChunks(mapOfChunks);
           this.fileVerifier.prepare();
           this.client
-              .send("file~" + this.listFcm.get(this.fileCounter).getUuid() + "CHUNK-ID~" + this.chunkCounter);
+              .send("client/file~" + this.listFcm.get(this.fileCounter).getUuid() + "CHUNK-ID~" + this.chunkCounter);
         }
       } else {
-        this.client.send("file~" + tempFcm.getUuid() + "CHUNK-ID~" + this.chunkCounter);
+        this.client.send("client/file~" + tempFcm.getUuid() + "CHUNK-ID~" + this.chunkCounter);
       }
     }
   }
@@ -101,7 +101,7 @@ public class ServerHandler
         this.listFcm.get(this.fileCounter).setMapOfChunks(mapOfChunks);
         this.fileVerifier.prepare();
 
-        this.client.send("file~" + this.listFcm.get(this.fileCounter).getUuid() +
+        this.client.send("client/file~" + this.listFcm.get(this.fileCounter).getUuid() +
             "CHUNK-ID~" + this.chunkCounter);
       } catch (Exception e) {
         e.printStackTrace();
