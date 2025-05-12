@@ -31,6 +31,7 @@ import org.slf4j.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.hash.Hashing;
+import com.google.inject.Inject;
 
 public class Client extends WebSocketClient {
   Path toBeReceived = Paths.get("toBeReceived");
@@ -60,12 +61,19 @@ public class Client extends WebSocketClient {
   int receiveChunkCounter = 0;
   boolean isFinished;
 
+  private ServerHandler serverHandler;
+
   public Client(URI serverUri, Draft draft) {
     super(serverUri, draft);
   }
 
   public Client(URI serverURI) {
     super(serverURI);
+  }
+
+  @Inject
+  public void injectDependencies(ServerHandler serverHandler) {
+    this.serverHandler = serverHandler;
   }
 
   @Override
@@ -75,10 +83,7 @@ public class Client extends WebSocketClient {
 
   @Override
   public void onMessage(String message) {
-    // logger.info(message);
-    if (message.equals("PING")) {
-      send("PONG");
-    } else if (message.startsWith("FILE-METADATA~")) {
+    if (message.startsWith("FILE-METADATA~")) {
       try {
         fos = new FileOutputStream(toBeReceived.toFile());
       } catch (Exception e) {
@@ -119,42 +124,7 @@ public class Client extends WebSocketClient {
         logger.error(e.getMessage());
       }
     } else if (message.startsWith("server/")) {
-      String httpMessage = message.substring(7);
-      logger.info("you maasuk bro");
-      if (httpMessage.startsWith("metadata/")) {
-        String json = httpMessage.substring(9);
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.enable(SerializationFeature.INDENT_OUTPUT); // pretty print
-        try {
-          // Context context = mapper.readValue(json, Context.class);
-          logger.info(json);
-          return;
-
-          // this.listFileMetadata = metadata.getFileMetadataList();
-          // this.listOfChunkMaps = new ArrayList<>();
-          //
-          // this.title = metadata.getTitle();
-          // this.entryId = metadata.getEntryId();
-          // Path dir = Paths.get("files/" + this.title);
-          // Files.createDirectories(dir);
-          //
-          // this.isFinished = false;
-          //
-          // for (int i = 0; i < this.listFileMetadata.size(); i++) {
-          // this.listOfChunkMaps.add(new HashMap<>());
-          //
-          // Path toBeReceived = Paths.get("files/" + this.title + "/toBeReceived_" + i);
-          // this.listPath.add(toBeReceived);
-          // this.listFos.add(new FileOutputStream(toBeReceived.toFile()));
-          // }
-          //
-          // send("file~" + this.receiveFileCounter + "CHUNK-ID~" +
-          // this.receiveChunkCounter);
-
-        } catch (Exception e) {
-          e.printStackTrace();
-        }
-      }
+      this.serverHandler.handleString(message.substring(7));
     }
   }
 

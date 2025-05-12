@@ -21,6 +21,7 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind:2.0.1")
     compileOnly("org.projectlombok:lombok:1.18.36")
     annotationProcessor("org.projectlombok:lombok:1.18.36")
+    implementation("com.google.inject:guice:7.0.0")
     // Use JUnit Jupiter for testing.
     testImplementation(libs.junit.jupiter)
 
