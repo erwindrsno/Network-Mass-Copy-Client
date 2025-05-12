@@ -14,7 +14,7 @@ public class App {
     System.out.println("Connecting to localhost");
     // System.out.println("Connecting to 10.100.70.60:8887");
     // WebSocketClient client = new Client(new URI("ws://192.168.0.102:8887"));
-    WebSocketClient client = new Client(new URI("ws://10.100.75.112:8887"));
+    WebSocketClient client = new Client(new URI("ws://10.100.70.211:8887"));
     client.connect();
   }
 }
