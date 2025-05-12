@@ -82,35 +82,31 @@ public class ServerHandler
 
   @Override
   public void handleString(String message) {
-    String json = message.substring(9);
-    ObjectMapper mapper = new ObjectMapper();
+    if (message.startsWith("metadata/")) {
+      String json = message.substring(9);
+      ObjectMapper mapper = new ObjectMapper();
+      mapper.enable(SerializationFeature.INDENT_OUTPUT); // pretty print
+      logger.info(json);
 
-    mapper.enable(SerializationFeature.INDENT_OUTPUT); // pretty print
-    logger.info("displaying serializing json:");
-    logger.info(json);
-    // if (message.startsWith("metadata/")) {
-    // String json = message.substring(9);
-    // ObjectMapper mapper = new ObjectMapper();
-    //
-    // try {
-    // this.context = mapper.readValue(json, Context.class);
-    // this.listFcm = this.context.getListFcm();
-    //
-    // this.fileCounter = 0;
-    // this.chunkCounter = 0;
-    // this.readyToReceive = true;
-    //
-    // Map<Long, byte[]> mapOfChunks = new HashMap<>();
-    //
-    // this.listFcm.get(this.fileCounter).setMapOfChunks(mapOfChunks);
-    // this.fileVerifier.prepare();
-    //
-    // this.client.send("file~" + this.listFcm.get(this.fileCounter).getUuid() +
-    // "CHUNK-ID~" + this.chunkCounter);
-    // } catch (Exception e) {
-    // e.printStackTrace();
-    // }
-    // }
+      try {
+        this.context = mapper.readValue(json, Context.class);
+        this.listFcm = this.context.getListFcm();
+
+        this.fileCounter = 0;
+        this.chunkCounter = 0;
+        this.readyToReceive = true;
+
+        Map<Long, byte[]> mapOfChunks = new HashMap<>();
+
+        this.listFcm.get(this.fileCounter).setMapOfChunks(mapOfChunks);
+        this.fileVerifier.prepare();
+
+        this.client.send("file~" + this.listFcm.get(this.fileCounter).getUuid() +
+            "CHUNK-ID~" + this.chunkCounter);
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
   }
 
 }
