@@ -32,7 +32,8 @@ public class WebSocketModule extends AbstractModule {
   public Client provideClient(Logger logger, @Named("host") String host,
       @Named("port") int port) {
     try {
-      return new Client(new URI("ws://192.168.0.102:8887"));
+      URI uri = new URI("ws://" + host + ":" + port);
+      return new Client(uri);
     } catch (Exception e) {
       logger.error(e.getMessage(), e);
       return null;
