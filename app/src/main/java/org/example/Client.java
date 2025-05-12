@@ -75,7 +75,7 @@ public class Client extends WebSocketClient {
 
   @Override
   public void onMessage(String message) {
-    logger.info(message);
+    // logger.info(message);
     if (message.equals("PING")) {
       send("PONG");
     } else if (message.startsWith("FILE-METADATA~")) {
