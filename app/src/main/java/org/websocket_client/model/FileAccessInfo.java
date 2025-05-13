@@ -29,6 +29,6 @@ public class FileAccessInfo {
   @JsonProperty("ip_address")
   String ip_address;
 
-  @JsonProperty("fcm_uuid")
-  String fcmUuid;
+  @JsonProperty("file_name")
+  String filename;
 }
