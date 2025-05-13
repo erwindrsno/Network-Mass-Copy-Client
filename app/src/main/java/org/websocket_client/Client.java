@@ -20,6 +20,7 @@ import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft;
 import org.java_websocket.handshake.ServerHandshake;
 import org.slf4j.*;
+import org.websocket_client.handler.ServerHandler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.hash.Hashing;
