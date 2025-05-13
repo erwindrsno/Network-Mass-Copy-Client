@@ -2,8 +2,6 @@ package org.websocket_client;
 
 import java.net.URISyntaxException;
 
-import org.websocket_client.handler.ServerHandler;
-
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 
