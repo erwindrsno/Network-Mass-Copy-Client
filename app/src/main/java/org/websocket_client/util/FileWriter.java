@@ -9,11 +9,16 @@ import org.websocket_client.Client;
 import org.websocket_client.model.FileAccessInfo;
 import org.websocket_client.model.FileChunkMetadata;
 
+import com.google.inject.Inject;
+
 public class FileWriter {
   private Logger logger;
+  private Client client;
 
-  public FileWriter() {
+  @Inject
+  public FileWriter(Client client) {
     this.logger = LoggerFactory.getLogger(Client.class);
+    this.client = client;
   }
 
   public void writeFile(FileChunkMetadata fcm, FileAccessInfo fai) {
@@ -25,6 +30,7 @@ public class FileWriter {
       for (long i = 0; i < fcm.getChunkCount(); i++) {
         Files.write(path, fcm.getMapOfChunks().get(i));
       }
+      this.client.send("client/status/ok");
     } catch (Exception e) {
       logger.error(e.getMessage(), e);
     }
