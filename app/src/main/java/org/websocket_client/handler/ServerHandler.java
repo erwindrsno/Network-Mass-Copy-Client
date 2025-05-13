@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,7 +63,12 @@ public class ServerHandler
         boolean isVerified = this.fileVerifier.verifyHashedBytes(tempFcm.getSignature());
         if (isVerified) {
           logger.info("File is safe. dont worry.");
-          this.fileWriter.writeFile(tempFcm, this.listFai.get(this.fileCounter));
+
+          Optional<FileAccessInfo> retrievedFai = listFai.stream()
+              .filter(fai -> fai.getFilename().equals(tempFcm.getFilename()))
+              .findFirst();
+
+          this.fileWriter.writeFile(tempFcm, retrievedFai.get());
         } else {
           logger.error("a file is NOT SAFE..., go next!");
         }
