@@ -28,6 +28,7 @@ public class FileAccessInfo {
 
   @JsonProperty("ip_address")
   String ip_address;
+
+  @JsonProperty("fcm_uuid")
+  String fcmUuid;
 }
-// listFileMetadata.add(new FileMetadata(chunkSize, chunkCount, filename,
-// signature, "test"));
