@@ -22,7 +22,7 @@ public class FileWriter {
     try {
       Path path = Path.of(fai.getPath());
       Files.createDirectories(path.getParent());
-      for (long i = 0; i <= fcm.getChunkCount(); i++) {
+      for (long i = 0; i < fcm.getChunkCount(); i++) {
         Files.write(path, fcm.getMapOfChunks().get(i));
       }
     } catch (Exception e) {
