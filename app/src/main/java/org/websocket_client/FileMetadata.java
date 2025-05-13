@@ -1,4 +1,4 @@
-package org.example;
+package org.websocket_client;
 
 import java.nio.file.attribute.AclEntryPermission;
 import java.util.Set;

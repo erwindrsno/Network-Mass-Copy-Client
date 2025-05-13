@@ -1,5 +1,4 @@
-
-package org.example;
+package org.websocket_client.handler;
 
 import java.nio.ByteBuffer;
 

@@ -1,9 +1,12 @@
-package org.example;
+package org.websocket_client;
 
 import java.net.URI;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.websocket_client.handler.ServerHandler;
+import org.websocket_client.util.FileVerifier;
+import org.websocket_client.util.FileWriter;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
@@ -18,6 +21,7 @@ public class WebSocketModule extends AbstractModule {
     bind(Integer.class).annotatedWith(Names.named("port")).toInstance(8887);
     bind(ServerHandler.class).in(Singleton.class);
     bind(FileVerifier.class).in(Singleton.class);
+    bind(FileWriter.class).in(Singleton.class);
   }
 
   @Provides
@@ -39,17 +43,4 @@ public class WebSocketModule extends AbstractModule {
       return null;
     }
   }
-
-  // @Provides
-  // @Singleton
-  // public WebSocketServer provideWebSocketServer(Server providedServer, Logger
-  // logger) {
-  // try {
-  // WebSocketServer server = providedServer;
-  // return server;
-  // } catch (Exception e) {
-  // logger.error(e.getMessage(), e);
-  // return null;
-  // }
-  // }
 }

@@ -1,4 +1,4 @@
-package org.example;
+package org.websocket_client.model;
 
 import java.util.List;
 

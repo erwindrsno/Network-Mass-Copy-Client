@@ -1,4 +1,4 @@
-package org.example;
+package org.websocket_client.util;
 
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;

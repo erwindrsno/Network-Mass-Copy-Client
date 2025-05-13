@@ -1,4 +1,4 @@
-package org.example;
+package org.websocket_client.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;

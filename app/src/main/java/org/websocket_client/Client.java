@@ -1,4 +1,4 @@
-package org.example;
+package org.websocket_client;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileOutputStream;
@@ -9,14 +9,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.nio.file.attribute.AclEntry;
-import java.nio.file.attribute.AclEntryFlag;
 import java.nio.file.attribute.AclEntryPermission;
-import java.nio.file.attribute.AclEntryType;
-import java.nio.file.attribute.AclFileAttributeView;
-import java.nio.file.attribute.UserPrincipal;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,12 +18,10 @@ import java.util.Set;
 
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft;
-import org.java_websocket.framing.PongFrame;
 import org.java_websocket.handshake.ServerHandshake;
 import org.slf4j.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.hash.Hashing;
 import com.google.inject.Inject;
 
@@ -201,7 +193,7 @@ public class Client extends WebSocketClient {
     System.err.println("an error occurred:" + ex);
   }
 
-  public void validateFileAndHandleAcl() {
+  public void writeFileAndHandleAcl() {
     try {
       Path filePath = Paths.get(this.fileMetadata.getFileName());
       // String user = this.fileMetadata.getUser();
