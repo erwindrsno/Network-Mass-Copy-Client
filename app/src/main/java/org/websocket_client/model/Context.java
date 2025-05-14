@@ -16,6 +16,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @JsonDeserialize(builder = Context.ContextBuilder.class)
 public class Context {
+  @JsonProperty("entry_id")
+  Integer entryId;
+
   @JsonProperty("list_fai")
   List<FileAccessInfo> listFai;
 
