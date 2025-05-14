@@ -17,6 +17,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @JsonDeserialize(builder = FileChunkMetadata.FileChunkMetadataBuilder.class)
 public class FileChunkMetadata {
+  @JsonProperty("id")
+  Integer id;
+
   @JsonProperty("uuid")
   String uuid;
 

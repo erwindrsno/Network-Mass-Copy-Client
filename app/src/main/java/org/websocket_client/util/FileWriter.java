@@ -28,7 +28,7 @@ public class FileWriter {
       for (long i = 0; i < fcm.getChunkCount(); i++) {
         Files.write(path, fcm.getMapOfChunks().get(i));
       }
-      this.client.send("client/" + "ok/" + fcm.getFilename());
+      this.client.send("client/" + "ok/" + fai.getId());
     } catch (Exception e) {
       logger.error(e.getMessage(), e);
     }

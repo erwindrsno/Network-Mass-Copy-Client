@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @JsonDeserialize(builder = FileAccessInfo.FileAccessInfoBuilder.class)
 public class FileAccessInfo {
   @JsonProperty("id")
-  int id;
+  Integer id;
 
   @JsonProperty("path")
   String path;
