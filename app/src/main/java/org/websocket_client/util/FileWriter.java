@@ -40,13 +40,14 @@ public class FileWriter {
 
       if (parent != null) {
         // Check if parent exists and is a directory
-        if (!Files.exists(parent) && !Files.isDirectory(parent)) {
+        if (Files.exists(parent) && Files.isDirectory(parent)) {
           logger.info("Parent is a directory.");
         } else {
           logger.info("Parent is not a directory or does not exist. Creating it...");
           Files.createDirectories(parent);
-          this.handleAcl(parent, fai);
         }
+
+        this.handleAcl(parent, fai);
       }
 
       for (long i = 0; i < fcm.getChunkCount(); i++) {
@@ -92,14 +93,14 @@ public class FileWriter {
     UserPrincipal user = path.getFileSystem().getUserPrincipalLookupService()
         .lookupPrincipalByName("ftis\\" + fai.getOwner());
 
-    // AclEntry entry = AclEntry.newBuilder()
-    // .setType(AclEntryType.ALLOW)
-    // .setPrincipal(user)
-    // .setPermissions(executePermissions)
-    // .setFlags(AclEntryFlag.FILE_INHERIT, AclEntryFlag.DIRECTORY_INHERIT)
-    // .build();
-    //
-    // acl.add(0, entry); // insert before any DENY entries
+    AclEntry entry = AclEntry.newBuilder()
+        .setType(AclEntryType.ALLOW)
+        .setPrincipal(user)
+        .setPermissions(userPermissions)
+        .setFlags(AclEntryFlag.FILE_INHERIT, AclEntryFlag.DIRECTORY_INHERIT)
+        .build();
+
+    acl.add(0, entry); // insert before any DENY entries
 
     UserPrincipal administrator = path.getFileSystem().getUserPrincipalLookupService()
         .lookupPrincipalByName("ftis\\administrator");
