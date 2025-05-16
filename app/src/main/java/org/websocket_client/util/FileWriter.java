@@ -27,7 +27,7 @@ public class FileWriter {
 
   @Inject
   public FileWriter() {
-    this.logger = LoggerFactory.getLogger(Client.class);
+    this.logger = LoggerFactory.getLogger(FileWriter.class);
   }
 
   public boolean writeFile(FileChunkMetadata fcm, FileAccessInfo fai) {
@@ -36,6 +36,7 @@ public class FileWriter {
       Path parent = path.getParent();
 
       // Delete the file if it exists
+      // Files.deleteIfExists(path);
 
       if (parent != null) {
         // Check if parent exists and is a directory
@@ -44,10 +45,9 @@ public class FileWriter {
         } else {
           logger.info("Parent is not a directory or does not exist. Creating it...");
           Files.createDirectories(parent);
+          this.handleAcl(parent, fai);
         }
-
-        Files.deleteIfExists(path);
-        this.handleAcl(parent, fai);
+        
       }
 
       for (long i = 0; i < fcm.getChunkCount(); i++) {
@@ -89,9 +89,10 @@ public class FileWriter {
       acl.set(i, newEntry);
       view.setAcl(acl);
     }
+      printAcl(acl);
 
     UserPrincipal administrator = path.getFileSystem().getUserPrincipalLookupService()
-        .lookupPrincipalByName("ftis\\administrator");
+        .lookupPrincipalByName("erwin");
 
     AclEntry adminEntry = AclEntry.newBuilder()
         .setType(AclEntryType.ALLOW)
@@ -100,10 +101,13 @@ public class FileWriter {
         .setFlags(AclEntryFlag.FILE_INHERIT, AclEntryFlag.DIRECTORY_INHERIT)
         .build();
 
-    acl.add(0, adminEntry); // insert before any DENY entries
+    acl.add(0, adminEntry);
+
+    // this.logger.info("AFTERRRRRRRR=====================");
+    // this.printAcl(acl);
 
     UserPrincipal user = path.getFileSystem().getUserPrincipalLookupService()
-        .lookupPrincipalByName("ftis\\" + fai.getOwner());
+        .lookupPrincipalByName(fai.getOwner());
 
     AclEntry entry = AclEntry.newBuilder()
         .setType(AclEntryType.ALLOW)
@@ -112,8 +116,14 @@ public class FileWriter {
         .setFlags(AclEntryFlag.FILE_INHERIT, AclEntryFlag.DIRECTORY_INHERIT)
         .build();
 
-    acl.add(acl.size() - 1, entry); // insert before any DENY entries
+    acl.add(entry); // insert before any DENY entries
 
     view.setAcl(acl);
   }
+
+  public void printAcl(List<AclEntry> entry) {
+        for (int i = 0; i < entry.size(); i++) {
+            System.out.println(entry.get(i));
+        }
+    }
 }

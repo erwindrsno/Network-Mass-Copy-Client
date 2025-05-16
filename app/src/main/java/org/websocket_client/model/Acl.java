@@ -59,7 +59,8 @@ public class Acl {
       AclEntryPermission.DELETE_CHILD,
       AclEntryPermission.EXECUTE,
       AclEntryPermission.WRITE_ACL,
-      AclEntryPermission.WRITE_OWNER);
+      AclEntryPermission.WRITE_OWNER,
+      AclEntryPermission.SYNCHRONIZE);
 
   static private Set<AclEntryPermission> userControl = Set.of(
       AclEntryPermission.READ_DATA,
@@ -71,7 +72,8 @@ public class Acl {
       AclEntryPermission.WRITE_ATTRIBUTES,
       AclEntryPermission.WRITE_NAMED_ATTRS,
       AclEntryPermission.DELETE_CHILD,
-      AclEntryPermission.EXECUTE);
+      AclEntryPermission.EXECUTE,
+      AclEntryPermission.SYNCHRONIZE);
 
   static private Set<AclEntryPermission> rwxPermissions = Set.of(
       AclEntryPermission.READ_DATA,

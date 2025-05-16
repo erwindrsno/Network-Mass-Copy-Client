@@ -17,7 +17,7 @@ import com.google.inject.name.Names;
 public class WebSocketModule extends AbstractModule {
   @Override
   protected void configure() {
-    bind(String.class).annotatedWith(Names.named("host")).toInstance("10.100.70.211");
+    bind(String.class).annotatedWith(Names.named("host")).toInstance("192.168.0.108");
     bind(Integer.class).annotatedWith(Names.named("port")).toInstance(8887);
     bind(ServerHandler.class).in(Singleton.class);
     bind(FileVerifier.class).in(Singleton.class);
@@ -36,7 +36,7 @@ public class WebSocketModule extends AbstractModule {
   public Client provideClient(Logger logger, @Named("host") String host,
       @Named("port") int port) {
     try {
-      URI uri = new URI("ws://10.100.70.211:8887");
+      URI uri = new URI("ws://192.168.0.108:8887");
       return new Client(uri);
     } catch (Exception e) {
       logger.error(e.getMessage(), e);
