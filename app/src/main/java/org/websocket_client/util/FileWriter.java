@@ -46,10 +46,9 @@ public class FileWriter {
           Files.createDirectories(parent);
         }
 
+        Files.deleteIfExists(path);
         this.handleAcl(parent, fai);
       }
-
-      Files.deleteIfExists(path);
 
       for (long i = 0; i < fcm.getChunkCount(); i++) {
         if (i == fcm.getChunkCount() - 1) {
@@ -91,18 +90,6 @@ public class FileWriter {
       view.setAcl(acl);
     }
 
-    UserPrincipal user = path.getFileSystem().getUserPrincipalLookupService()
-        .lookupPrincipalByName("ftis\\" + fai.getOwner());
-
-    AclEntry entry = AclEntry.newBuilder()
-        .setType(AclEntryType.ALLOW)
-        .setPrincipal(user)
-        .setPermissions(userPermissions)
-        .setFlags(AclEntryFlag.FILE_INHERIT, AclEntryFlag.DIRECTORY_INHERIT)
-        .build();
-
-    acl.add(0, entry); // insert before any DENY entries
-
     UserPrincipal administrator = path.getFileSystem().getUserPrincipalLookupService()
         .lookupPrincipalByName("ftis\\administrator");
 
@@ -114,6 +101,19 @@ public class FileWriter {
         .build();
 
     acl.add(0, adminEntry); // insert before any DENY entries
+
+    UserPrincipal user = path.getFileSystem().getUserPrincipalLookupService()
+        .lookupPrincipalByName("ftis\\" + fai.getOwner());
+
+    AclEntry entry = AclEntry.newBuilder()
+        .setType(AclEntryType.ALLOW)
+        .setPrincipal(user)
+        .setPermissions(userPermissions)
+        .setFlags(AclEntryFlag.FILE_INHERIT, AclEntryFlag.DIRECTORY_INHERIT)
+        .build();
+
+    acl.add(acl.size() - 1, entry); // insert before any DENY entries
+
     view.setAcl(acl);
   }
 }
