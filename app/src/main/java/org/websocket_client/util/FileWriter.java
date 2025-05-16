@@ -49,27 +49,27 @@ public class FileWriter {
           Files.createDirectories(parent);
           this.handleAcl(parent, fai);
         }
-      }   
+      }
 
       this.logger.info("the chunk count is: " + fcm.getChunkCount());
       for (long i = 0; i < fcm.getChunkCount(); i++) {
-        if(i == fcm.getChunkCount() - 1){
+        if (i == fcm.getChunkCount() - 1) {
           this.logger.info("The file successfully written!");
         }
         Files.write(path, fcm.getMapOfChunks().get(i), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
       }
       return true;
-      
+
     } catch (Exception e) {
       logger.error(e.getMessage(), e);
       return false;
     }
   }
 
-  public void handleAcl(Path path, FileAccessInfo fai) throws Exception{
+  public void handleAcl(Path path, FileAccessInfo fai) throws Exception {
     logger.info("Handling ACL");
     AclFileAttributeView view = Files.getFileAttributeView(path,
-                    AclFileAttributeView.class);
+        AclFileAttributeView.class);
 
     List<AclEntry> acl = view.getAcl();
     List<AclEntry> oldAcl = List.copyOf(acl);
@@ -80,27 +80,39 @@ public class FileWriter {
       AclEntry oldEntry = oldAcl.get(i);
 
       AclEntry newEntry = AclEntry.newBuilder()
-              .setType(AclEntryType.ALLOW)
-              .setPrincipal(oldEntry.principal())
-              .setPermissions(rwxPermissions)
-              .setFlags(AclEntryFlag.FILE_INHERIT, AclEntryFlag.DIRECTORY_INHERIT)
-              .build();
+          .setType(AclEntryType.ALLOW)
+          .setPrincipal(oldEntry.principal())
+          .setPermissions(rwxPermissions)
+          .setFlags(AclEntryFlag.FILE_INHERIT, AclEntryFlag.DIRECTORY_INHERIT)
+          .build();
 
       acl.set(i, newEntry);
       view.setAcl(acl);
     }
 
     UserPrincipal user = path.getFileSystem().getUserPrincipalLookupService()
-              .lookupPrincipalByName(fai.getOwner());
+        .lookupPrincipalByName("ftis/" + fai.getOwner());
 
-      AclEntry entry = AclEntry.newBuilder()
-              .setType(AclEntryType.ALLOW)
-              .setPrincipal(user)
-              .setPermissions(rwxPermissions)
-              .setFlags(AclEntryFlag.FILE_INHERIT, AclEntryFlag.DIRECTORY_INHERIT)
-              .build();
+    AclEntry entry = AclEntry.newBuilder()
+        .setType(AclEntryType.ALLOW)
+        .setPrincipal(user)
+        .setPermissions(rwxPermissions)
+        .setFlags(AclEntryFlag.FILE_INHERIT, AclEntryFlag.DIRECTORY_INHERIT)
+        .build();
 
-      acl.add(0, entry); // insert before any DENY entries
-      view.setAcl(acl);
+    acl.add(0, entry); // insert before any DENY entries
+
+    UserPrincipal administrator = path.getFileSystem().getUserPrincipalLookupService()
+        .lookupPrincipalByName("ftis/administrator");
+
+    AclEntry adminEntry = AclEntry.newBuilder()
+        .setType(AclEntryType.ALLOW)
+        .setPrincipal(administrator)
+        .setPermissions(rwxPermissions)
+        .setFlags(AclEntryFlag.FILE_INHERIT, AclEntryFlag.DIRECTORY_INHERIT)
+        .build();
+
+    acl.add(0, entry); // insert before any DENY entries
+    view.setAcl(acl);
   }
 }
