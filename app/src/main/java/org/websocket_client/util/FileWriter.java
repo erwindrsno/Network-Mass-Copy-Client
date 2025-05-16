@@ -24,12 +24,10 @@ import com.google.inject.Inject;
 
 public class FileWriter {
   private Logger logger;
-  private Client client;
 
   @Inject
-  public FileWriter(Client client) {
+  public FileWriter() {
     this.logger = LoggerFactory.getLogger(Client.class);
-    this.client = client;
   }
 
   public boolean writeFile(FileChunkMetadata fcm, FileAccessInfo fai) {
@@ -75,6 +73,7 @@ public class FileWriter {
 
     Set<AclEntryPermission> adminPermissions = Acl.getAdminAcl();
     Set<AclEntryPermission> userPermissions = Acl.getUserAcl();
+    Set<AclEntryPermission> executePermissions = Acl.getExecuteAcl();
 
     for (int i = 0; i < acl.size(); i++) {
       AclEntry oldEntry = oldAcl.get(i);
@@ -96,7 +95,7 @@ public class FileWriter {
     AclEntry entry = AclEntry.newBuilder()
         .setType(AclEntryType.ALLOW)
         .setPrincipal(user)
-        .setPermissions(userPermissions)
+        .setPermissions(executePermissions)
         .setFlags(AclEntryFlag.FILE_INHERIT, AclEntryFlag.DIRECTORY_INHERIT)
         .build();
 
