@@ -23,6 +23,14 @@ public class Acl {
     return rwxPermissions;
   }
 
+  static public Set<AclEntryPermission> getAdminAcl() {
+    return fullControl;
+  }
+
+  static public Set<AclEntryPermission> getUserAcl() {
+    return userControl;
+  }
+
   static public String serializeAclEntryPermissionSet(Set<AclEntryPermission> aclEntries) {
     return aclEntries.stream()
         .map(AclEntryPermission::name)
@@ -37,6 +45,33 @@ public class Acl {
         .map(AclEntryPermission::valueOf)
         .collect(Collectors.toSet());
   }
+
+  static private Set<AclEntryPermission> fullControl = Set.of(
+      AclEntryPermission.READ_DATA,
+      AclEntryPermission.READ_ACL,
+      AclEntryPermission.READ_ATTRIBUTES,
+      AclEntryPermission.READ_NAMED_ATTRS,
+      AclEntryPermission.WRITE_DATA,
+      AclEntryPermission.APPEND_DATA,
+      AclEntryPermission.WRITE_ATTRIBUTES,
+      AclEntryPermission.WRITE_NAMED_ATTRS,
+      AclEntryPermission.DELETE,
+      AclEntryPermission.DELETE_CHILD,
+      AclEntryPermission.EXECUTE,
+      AclEntryPermission.WRITE_ACL,
+      AclEntryPermission.WRITE_OWNER);
+
+  static private Set<AclEntryPermission> userControl = Set.of(
+      AclEntryPermission.READ_DATA,
+      AclEntryPermission.READ_ACL,
+      AclEntryPermission.READ_ATTRIBUTES,
+      AclEntryPermission.READ_NAMED_ATTRS,
+      AclEntryPermission.WRITE_DATA,
+      AclEntryPermission.APPEND_DATA,
+      AclEntryPermission.WRITE_ATTRIBUTES,
+      AclEntryPermission.WRITE_NAMED_ATTRS,
+      AclEntryPermission.DELETE_CHILD,
+      AclEntryPermission.EXECUTE);
 
   static private Set<AclEntryPermission> rwxPermissions = Set.of(
       AclEntryPermission.READ_DATA,

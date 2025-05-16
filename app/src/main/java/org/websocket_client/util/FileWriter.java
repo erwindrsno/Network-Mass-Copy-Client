@@ -42,7 +42,7 @@ public class FileWriter {
 
       if (parent != null) {
         // Check if parent exists and is a directory
-        if (Files.exists(parent) && Files.isDirectory(parent)) {
+        if (!Files.exists(parent) && !Files.isDirectory(parent)) {
           logger.info("Parent is a directory.");
         } else {
           logger.info("Parent is not a directory or does not exist. Creating it...");
@@ -51,7 +51,6 @@ public class FileWriter {
         }
       }
 
-      this.logger.info("the chunk count is: " + fcm.getChunkCount());
       for (long i = 0; i < fcm.getChunkCount(); i++) {
         if (i == fcm.getChunkCount() - 1) {
           this.logger.info("The file successfully written!");
@@ -74,7 +73,8 @@ public class FileWriter {
     List<AclEntry> acl = view.getAcl();
     List<AclEntry> oldAcl = List.copyOf(acl);
 
-    Set<AclEntryPermission> rwxPermissions = Acl.getRWXAcl();
+    Set<AclEntryPermission> adminPermissions = Acl.getAdminAcl();
+    Set<AclEntryPermission> userPermissions = Acl.getUserAcl();
 
     for (int i = 0; i < acl.size(); i++) {
       AclEntry oldEntry = oldAcl.get(i);
@@ -82,7 +82,7 @@ public class FileWriter {
       AclEntry newEntry = AclEntry.newBuilder()
           .setType(AclEntryType.ALLOW)
           .setPrincipal(oldEntry.principal())
-          .setPermissions(rwxPermissions)
+          .setPermissions(adminPermissions)
           .setFlags(AclEntryFlag.FILE_INHERIT, AclEntryFlag.DIRECTORY_INHERIT)
           .build();
 
@@ -96,7 +96,7 @@ public class FileWriter {
     AclEntry entry = AclEntry.newBuilder()
         .setType(AclEntryType.ALLOW)
         .setPrincipal(user)
-        .setPermissions(rwxPermissions)
+        .setPermissions(userPermissions)
         .setFlags(AclEntryFlag.FILE_INHERIT, AclEntryFlag.DIRECTORY_INHERIT)
         .build();
 
@@ -108,7 +108,7 @@ public class FileWriter {
     AclEntry adminEntry = AclEntry.newBuilder()
         .setType(AclEntryType.ALLOW)
         .setPrincipal(administrator)
-        .setPermissions(rwxPermissions)
+        .setPermissions(adminPermissions)
         .setFlags(AclEntryFlag.FILE_INHERIT, AclEntryFlag.DIRECTORY_INHERIT)
         .build();
 
