@@ -91,7 +91,7 @@ public class FileWriter {
     }
 
     UserPrincipal user = path.getFileSystem().getUserPrincipalLookupService()
-        .lookupPrincipalByName("ftis/" + fai.getOwner());
+        .lookupPrincipalByName("ftis\\" + fai.getOwner());
 
     AclEntry entry = AclEntry.newBuilder()
         .setType(AclEntryType.ALLOW)
@@ -103,7 +103,7 @@ public class FileWriter {
     acl.add(0, entry); // insert before any DENY entries
 
     UserPrincipal administrator = path.getFileSystem().getUserPrincipalLookupService()
-        .lookupPrincipalByName("ftis/administrator");
+        .lookupPrincipalByName("ftis\\administrator");
 
     AclEntry adminEntry = AclEntry.newBuilder()
         .setType(AclEntryType.ALLOW)
