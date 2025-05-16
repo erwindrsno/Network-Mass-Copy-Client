@@ -92,14 +92,14 @@ public class FileWriter {
     UserPrincipal user = path.getFileSystem().getUserPrincipalLookupService()
         .lookupPrincipalByName("ftis\\" + fai.getOwner());
 
-    AclEntry entry = AclEntry.newBuilder()
-        .setType(AclEntryType.ALLOW)
-        .setPrincipal(user)
-        .setPermissions(executePermissions)
-        .setFlags(AclEntryFlag.FILE_INHERIT, AclEntryFlag.DIRECTORY_INHERIT)
-        .build();
-
-    acl.add(0, entry); // insert before any DENY entries
+    // AclEntry entry = AclEntry.newBuilder()
+    // .setType(AclEntryType.ALLOW)
+    // .setPrincipal(user)
+    // .setPermissions(executePermissions)
+    // .setFlags(AclEntryFlag.FILE_INHERIT, AclEntryFlag.DIRECTORY_INHERIT)
+    // .build();
+    //
+    // acl.add(0, entry); // insert before any DENY entries
 
     UserPrincipal administrator = path.getFileSystem().getUserPrincipalLookupService()
         .lookupPrincipalByName("ftis\\administrator");
