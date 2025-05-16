@@ -68,7 +68,10 @@ public class ServerHandler
               .filter(fai -> fai.getFilename().equals(tempFcm.getFilename()))
               .findFirst();
 
-          this.fileWriter.writeFile(tempFcm, retrievedFai.get());
+          boolean isWritten = this.fileWriter.writeFile(tempFcm, retrievedFai.get());
+          if(isWritten){
+            this.client.send("client/" + "ok/" + retrievedFai.get().getId());
+          }   
         } else {
           logger.error("a file is NOT SAFE..., go next!");
         }
