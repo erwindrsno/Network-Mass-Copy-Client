@@ -36,7 +36,6 @@ public class FileWriter {
       Path parent = path.getParent();
 
       // Delete the file if it exists
-      Files.deleteIfExists(path);
 
       if (parent != null) {
         // Check if parent exists and is a directory
@@ -49,6 +48,8 @@ public class FileWriter {
 
         this.handleAcl(parent, fai);
       }
+
+      Files.deleteIfExists(path);
 
       for (long i = 0; i < fcm.getChunkCount(); i++) {
         if (i == fcm.getChunkCount() - 1) {
