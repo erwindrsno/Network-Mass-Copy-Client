@@ -112,7 +112,7 @@ public class FileWriter {
         .setFlags(AclEntryFlag.FILE_INHERIT, AclEntryFlag.DIRECTORY_INHERIT)
         .build();
 
-    acl.add(0, entry); // insert before any DENY entries
+    acl.add(0, adminEntry); // insert before any DENY entries
     view.setAcl(acl);
   }
 }
