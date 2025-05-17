@@ -3,22 +3,22 @@ package org.websocket_client.util;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.List;
-import java.util.Set;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.websocket_client.Client;
-import org.websocket_client.model.FileAccessInfo;
-import org.websocket_client.model.FileChunkMetadata;
-import org.websocket_client.model.Acl;
-
 import java.nio.file.attribute.AclEntry;
 import java.nio.file.attribute.AclEntryFlag;
 import java.nio.file.attribute.AclEntryPermission;
 import java.nio.file.attribute.AclEntryType;
 import java.nio.file.attribute.AclFileAttributeView;
 import java.nio.file.attribute.UserPrincipal;
+import java.security.Principal;
+import java.util.List;
+import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.websocket_client.Client;
+import org.websocket_client.model.Acl;
+import org.websocket_client.model.FileAccessInfo;
+import org.websocket_client.model.FileChunkMetadata;
 
 import com.google.inject.Inject;
 
@@ -27,7 +27,7 @@ public class FileWriter {
 
   @Inject
   public FileWriter() {
-    this.logger = LoggerFactory.getLogger(FileWriter.class);
+    this.logger = LoggerFactory.getLogger(Client.class);
   }
 
   public boolean writeFile(FileChunkMetadata fcm, FileAccessInfo fai) {
@@ -36,7 +36,7 @@ public class FileWriter {
       Path parent = path.getParent();
 
       // Delete the file if it exists
-      // Files.deleteIfExists(path);
+      Files.deleteIfExists(path);
 
       if (parent != null) {
         // Check if parent exists and is a directory
@@ -47,7 +47,6 @@ public class FileWriter {
           Files.createDirectories(parent);
           this.handleAcl(parent, fai);
         }
-        
       }
 
       for (long i = 0; i < fcm.getChunkCount(); i++) {
@@ -89,10 +88,9 @@ public class FileWriter {
       acl.set(i, newEntry);
       view.setAcl(acl);
     }
-      printAcl(acl);
 
     UserPrincipal administrator = path.getFileSystem().getUserPrincipalLookupService()
-        .lookupPrincipalByName("erwin");
+        .lookupPrincipalByName("ftis\\administrator");
 
     AclEntry adminEntry = AclEntry.newBuilder()
         .setType(AclEntryType.ALLOW)
@@ -101,13 +99,10 @@ public class FileWriter {
         .setFlags(AclEntryFlag.FILE_INHERIT, AclEntryFlag.DIRECTORY_INHERIT)
         .build();
 
-    acl.add(0, adminEntry);
-
-    // this.logger.info("AFTERRRRRRRR=====================");
-    // this.printAcl(acl);
+    acl.add(0, adminEntry); // insert before any DENY entries
 
     UserPrincipal user = path.getFileSystem().getUserPrincipalLookupService()
-        .lookupPrincipalByName(fai.getOwner());
+        .lookupPrincipalByName("ftis\\" + fai.getOwner());
 
     AclEntry entry = AclEntry.newBuilder()
         .setType(AclEntryType.ALLOW)
@@ -116,14 +111,8 @@ public class FileWriter {
         .setFlags(AclEntryFlag.FILE_INHERIT, AclEntryFlag.DIRECTORY_INHERIT)
         .build();
 
-    acl.add(entry); // insert before any DENY entries
+    acl.add(acl.size() - 1, entry); // insert before any DENY entries
 
     view.setAcl(acl);
   }
-
-  public void printAcl(List<AclEntry> entry) {
-        for (int i = 0; i < entry.size(); i++) {
-            System.out.println(entry.get(i));
-        }
-    }
 }

@@ -1,6 +1,7 @@
 package org.websocket_client.handler;
 
 import java.nio.ByteBuffer;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -69,9 +70,9 @@ public class ServerHandler
               .findFirst();
 
           boolean isWritten = this.fileWriter.writeFile(tempFcm, retrievedFai.get());
-          if(isWritten){
+          if (isWritten) {
             this.client.send("client/" + "ok/" + retrievedFai.get().getId());
-          }   
+          }
         } else {
           logger.error("a file is NOT SAFE..., go next!");
         }
@@ -84,6 +85,7 @@ public class ServerHandler
           this.fileCounter = 0;
           this.readyToReceive = false;
           logger.info("All files received. HOORAYYYYYYY");
+          this.client.send("client/fin");
 
           return;
         } else {
@@ -102,11 +104,9 @@ public class ServerHandler
 
   @Override
   public void handleString(String message) {
-    if (message.startsWith("metadata/")) {
-      String json = message.substring(9);
+    if (message.startsWith("metadata/copy/")) {
+      String json = message.substring(14);
       ObjectMapper mapper = new ObjectMapper();
-      mapper.enable(SerializationFeature.INDENT_OUTPUT); // pretty print
-      logger.info(json);
 
       try {
         this.context = mapper.readValue(json, Context.class);
@@ -126,6 +126,22 @@ public class ServerHandler
             "CHUNK-ID~" + this.chunkCounter);
       } catch (Exception e) {
         e.printStackTrace();
+      }
+    } else if (message.startsWith("metadata/takeown/")) {
+      String json = message.substring(17);
+      ObjectMapper mapper = new ObjectMapper();
+      try {
+        this.context = mapper.readValue(json, Context.class);
+        this.listFai = this.context.getListFai();
+        // Enable pretty-printing
+        mapper.enable(SerializationFeature.INDENT_OUTPUT);
+
+        logger.info(json);
+
+        // Path path = Path.of(.getPath());
+        // Path parent = path.getParent();
+      } catch (Exception e) {
+        logger.error(e.getMessage(), e);
       }
     }
   }
