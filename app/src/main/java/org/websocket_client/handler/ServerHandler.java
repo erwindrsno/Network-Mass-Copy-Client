@@ -1,9 +1,17 @@
 package org.websocket_client.handler;
 
 import java.nio.ByteBuffer;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.AclEntry;
+import java.nio.file.attribute.AclEntryFlag;
+import java.nio.file.attribute.AclEntryType;
+import java.nio.file.attribute.AclFileAttributeView;
+import java.nio.file.attribute.UserPrincipal;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Optional;
 
@@ -16,6 +24,7 @@ import org.websocket_client.model.FileAccessInfo;
 import org.websocket_client.model.FileChunkMetadata;
 import org.websocket_client.util.FileVerifier;
 import org.websocket_client.util.FileWriter;
+import org.websocket_client.model.Acl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -138,8 +147,39 @@ public class ServerHandler
 
         logger.info(json);
 
-        // Path path = Path.of(.getPath());
-        // Path parent = path.getParent();
+        Path path = Path.of(this.context.getListFai().get(0).getPath());
+        Path parent = path.getParent();
+
+        logger.info("the parent is: " + path.getParent());
+
+        AclFileAttributeView view = Files.getFileAttributeView(parent,
+        AclFileAttributeView.class);
+
+        UserPrincipal user = parent.getFileSystem().getUserPrincipalLookupService()
+        .lookupPrincipalByName(this.context.getListFai().get(0).getOwner());
+
+        List<AclEntry> acl = view.getAcl();
+        ListIterator<AclEntry> iterator = acl.listIterator();
+
+        while (iterator.hasNext()) {
+            AclEntry entry = iterator.next();
+            if (entry.principal().equals(user)) {
+                iterator.remove(); // Remove the old entry
+            }
+        }
+
+        AclEntry denyEntry = AclEntry.newBuilder()
+          .setPrincipal(user)
+          .setType(AclEntryType.DENY)
+          .setPermissions(Acl.getUserAcl()) // You can change this if needed
+          .setFlags(AclEntryFlag.FILE_INHERIT, AclEntryFlag.DIRECTORY_INHERIT)
+          .build();
+
+        acl.add(0,denyEntry);
+
+        logger.info("removing...");
+        view.setAcl(acl);
+
       } catch (Exception e) {
         logger.error(e.getMessage(), e);
       }
