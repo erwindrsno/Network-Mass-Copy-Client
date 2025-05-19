@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.websocket_client.Client;
 import org.websocket_client.WebSocketModule;
 import org.websocket_client.model.Context;
+import org.websocket_client.model.DirectoryAccessInfo;
 import org.websocket_client.model.FileAccessInfo;
 import org.websocket_client.model.FileChunkMetadata;
 import org.websocket_client.util.AclHandler;
@@ -38,6 +39,7 @@ public class ServerHandler
 
   private List<FileChunkMetadata> listFcm;
   private List<FileAccessInfo> listFai;
+  private List<DirectoryAccessInfo> listDai;
   private int fileCounter;
   private long chunkCounter;
   private boolean readyToReceive;
@@ -53,6 +55,7 @@ public class ServerHandler
     this.fileVerifier = fileVerifier;
     this.listFcm = null;
     this.listFai = null;
+    this.listDai = null;
     this.client = client;
     this.fileWriter = fileWriter;
     this.aclHandler = aclHandler;
@@ -82,6 +85,13 @@ public class ServerHandler
 
           boolean isWritten = this.fileWriter.writeFile(tempFcm, retrievedFai.get());
           if (isWritten) {
+            Integer directoryId = retrievedFai.get().getId();
+            DirectoryAccessInfo tempDai = this.listDai.stream()
+                .filter(dai -> dai.getId().equals(directoryId))
+                .findFirst()
+                .orElse(null);
+            int prevCopied = tempDai.getCopied();
+            tempDai.setCopied(prevCopied++);
             this.client.send("client/" + "ok/copy/" + retrievedFai.get().getId());
           }
         } else {
@@ -123,6 +133,7 @@ public class ServerHandler
         this.context = mapper.readValue(json, Context.class);
         this.listFcm = this.context.getListFcm();
         this.listFai = this.context.getListFai();
+        this.listDai = this.context.getListDai();
 
         this.fileCounter = 0;
         this.chunkCounter = 0;
@@ -151,19 +162,19 @@ public class ServerHandler
 
         List<FileAccessInfo> tempListFai = this.context.getListFai();
 
-        for(int i = 0; i < tempListFai.size(); i++){
+        for (int i = 0; i < tempListFai.size(); i++) {
           FileAccessInfo fai = tempListFai.get(i);
           Path path = Path.of(fai.getPath());
           boolean isTakeowned = this.aclHandler.handleTakeownAcl(path, fai.getOwner());
-          if(isTakeowned){
+          if (isTakeowned) {
             this.client.send("client/fin/takeown/" + this.context.getListFai().get(0).getOwner());
           }
-          if(i == tempListFai.size() -1){
+          if (i == tempListFai.size() - 1) {
             Path directory = path.getParent();
             boolean isDirTakeowned = this.aclHandler.handleTakeownAcl(directory, fai.getOwner());
-            if(isDirTakeowned){
+            if (isDirTakeowned) {
               logger.info("takeowned succeed!");
-            } else{
+            } else {
               throw new Error("takeown failed.");
             }
           }

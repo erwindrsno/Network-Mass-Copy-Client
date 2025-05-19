@@ -22,6 +22,9 @@ public class Context {
   @JsonProperty("list_fai")
   List<FileAccessInfo> listFai;
 
+  @JsonProperty("list_dai")
+  List<DirectoryAccessInfo> listDai;
+
   @JsonProperty("list_fcm")
   List<FileChunkMetadata> listFcm;
 }
