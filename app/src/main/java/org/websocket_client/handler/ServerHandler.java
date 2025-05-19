@@ -9,7 +9,6 @@ import java.nio.file.attribute.AclEntryType;
 import java.nio.file.attribute.AclFileAttributeView;
 import java.nio.file.attribute.UserPrincipal;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -22,6 +21,7 @@ import org.websocket_client.WebSocketModule;
 import org.websocket_client.model.Context;
 import org.websocket_client.model.FileAccessInfo;
 import org.websocket_client.model.FileChunkMetadata;
+import org.websocket_client.util.AclHandler;
 import org.websocket_client.util.FileVerifier;
 import org.websocket_client.util.FileWriter;
 import org.websocket_client.model.Acl;
@@ -44,9 +44,10 @@ public class ServerHandler
   private FileVerifier fileVerifier;
   private Client client;
   private FileWriter fileWriter;
+  private AclHandler aclHandler;
 
   @Inject
-  public ServerHandler(FileVerifier fileVerifier, Client client, FileWriter fileWriter) {
+  public ServerHandler(FileVerifier fileVerifier, Client client, FileWriter fileWriter, AclHandler aclHandler) {
     this.logger = LoggerFactory.getLogger(WebSocketModule.class);
     this.context = null;
     this.fileVerifier = fileVerifier;
@@ -54,6 +55,7 @@ public class ServerHandler
     this.listFai = null;
     this.client = client;
     this.fileWriter = fileWriter;
+    this.aclHandler = aclHandler;
   }
 
   @Override
@@ -80,7 +82,7 @@ public class ServerHandler
 
           boolean isWritten = this.fileWriter.writeFile(tempFcm, retrievedFai.get());
           if (isWritten) {
-            this.client.send("client/" + "ok/" + retrievedFai.get().getId());
+            this.client.send("client/" + "ok/copy/" + retrievedFai.get().getId());
           }
         } else {
           logger.error("a file is NOT SAFE..., go next!");
@@ -94,7 +96,7 @@ public class ServerHandler
           this.fileCounter = 0;
           this.readyToReceive = false;
           logger.info("All files received. HOORAYYYYYYY");
-          this.client.send("client/fin");
+          this.client.send("client/fin/copy/");
 
           return;
         } else {
@@ -147,39 +149,25 @@ public class ServerHandler
 
         logger.info(json);
 
-        Path path = Path.of(this.context.getListFai().get(0).getPath());
-        Path parent = path.getParent();
+        List<FileAccessInfo> tempListFai = this.context.getListFai();
 
-        logger.info("the parent is: " + path.getParent());
-
-        AclFileAttributeView view = Files.getFileAttributeView(parent,
-        AclFileAttributeView.class);
-
-        UserPrincipal user = parent.getFileSystem().getUserPrincipalLookupService()
-        .lookupPrincipalByName(this.context.getListFai().get(0).getOwner());
-
-        List<AclEntry> acl = view.getAcl();
-        ListIterator<AclEntry> iterator = acl.listIterator();
-
-        while (iterator.hasNext()) {
-            AclEntry entry = iterator.next();
-            if (entry.principal().equals(user)) {
-                iterator.remove(); // Remove the old entry
+        for(int i = 0; i < tempListFai.size(); i++){
+          FileAccessInfo fai = tempListFai.get(i);
+          Path path = Path.of(fai.getPath());
+          boolean isTakeowned = this.aclHandler.handleTakeownAcl(path, fai.getOwner());
+          if(isTakeowned){
+            this.client.send("client/fin/takeown/" + this.context.getListFai().get(0).getOwner());
+          }
+          if(i == tempListFai.size() -1){
+            Path directory = path.getParent();
+            boolean isDirTakeowned = this.aclHandler.handleTakeownAcl(directory, fai.getOwner());
+            if(isDirTakeowned){
+              logger.info("takeowned succeed!");
+            } else{
+              throw new Error("takeown failed.");
             }
+          }
         }
-
-        AclEntry denyEntry = AclEntry.newBuilder()
-          .setPrincipal(user)
-          .setType(AclEntryType.DENY)
-          .setPermissions(Acl.getUserAcl()) // You can change this if needed
-          .setFlags(AclEntryFlag.FILE_INHERIT, AclEntryFlag.DIRECTORY_INHERIT)
-          .build();
-
-        acl.add(0,denyEntry);
-
-        logger.info("removing...");
-        view.setAcl(acl);
-
       } catch (Exception e) {
         logger.error(e.getMessage(), e);
       }
