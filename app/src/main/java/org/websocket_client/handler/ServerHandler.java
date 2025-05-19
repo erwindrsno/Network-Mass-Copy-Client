@@ -85,13 +85,6 @@ public class ServerHandler
 
           boolean isWritten = this.fileWriter.writeFile(tempFcm, retrievedFai.get());
           if (isWritten) {
-            Integer directoryId = retrievedFai.get().getDirectoryId();
-            DirectoryAccessInfo tempDai = this.listDai.stream()
-                .filter(dai -> dai.getId().equals(directoryId))
-                .findFirst()
-                .orElse(null);
-            int prevCopied = tempDai.getCopied();
-            tempDai.setCopied(prevCopied + 1);
             this.client.send("client/" + "ok/copy/" + retrievedFai.get().getId());
           }
         } else {
@@ -106,13 +99,12 @@ public class ServerHandler
           this.fileCounter = 0;
           this.readyToReceive = false;
           logger.info("All files received. HOORAYYYYYYY");
-          try{
+          try {
             DirectoryAccessInfo tempDai = this.listDai.get(0);
-            this.client.send("client/fin/copy/"+tempDai.getId());
-          } catch(Exception e){
+            this.client.send("client/fin/copy/" + tempDai.getId());
+          } catch (Exception e) {
             logger.error(e.getMessage(), e);
           }
-          
 
           return;
         } else {
