@@ -25,4 +25,7 @@ public class DirectoryAccessInfo {
 
   @JsonProperty("copied")
   Integer copied;
+
+  @JsonProperty("owner")
+  String owner;
 }

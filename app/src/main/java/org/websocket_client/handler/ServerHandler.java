@@ -164,7 +164,7 @@ public class ServerHandler
 
         Path path = Path.of(this.listDai.get(0).getPath());
 
-        boolean isTakeowned = this.aclHandler.handleTakeownAcl(path, tempListFai.get(0).getOwner());
+        boolean isTakeowned = this.aclHandler.handleTakeownAcl(path, this.listDai.get(0).getOwner());
 
         if (isTakeowned) {
           this.client.send("client/fin/takeown/" + this.listDai.get(0).getId());
