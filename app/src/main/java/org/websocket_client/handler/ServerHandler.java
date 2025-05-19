@@ -127,8 +127,6 @@ public class ServerHandler
       String json = message.substring(14);
       ObjectMapper mapper = new ObjectMapper();
       mapper.enable(SerializationFeature.INDENT_OUTPUT);
-      logger.info("yeyeyeyeyeyeyeyey");
-      logger.info(json);
 
       try {
         this.context = mapper.readValue(json, Context.class);
@@ -156,6 +154,7 @@ public class ServerHandler
       try {
         this.context = mapper.readValue(json, Context.class);
         this.listFai = this.context.getListFai();
+        this.listDai = this.context.getListDai();
         // Enable pretty-printing
         mapper.enable(SerializationFeature.INDENT_OUTPUT);
 
@@ -163,22 +162,14 @@ public class ServerHandler
 
         List<FileAccessInfo> tempListFai = this.context.getListFai();
 
-        for (int i = 0; i < tempListFai.size(); i++) {
-          FileAccessInfo fai = tempListFai.get(i);
-          Path path = Path.of(fai.getPath());
-          boolean isTakeowned = this.aclHandler.handleTakeownAcl(path, fai.getOwner());
-          if (isTakeowned) {
-            this.client.send("client/fin/takeown/" + this.context.getListFai().get(0).getOwner());
-          }
-          if (i == tempListFai.size() - 1) {
-            Path directory = path.getParent();
-            boolean isDirTakeowned = this.aclHandler.handleTakeownAcl(directory, fai.getOwner());
-            if (isDirTakeowned) {
-              logger.info("takeowned succeed!");
-            } else {
-              throw new Error("takeown failed.");
-            }
-          }
+        Path path = Path.of(this.listDai.get(0).getPath());
+
+        boolean isTakeowned = this.aclHandler.handleTakeownAcl(path, tempListFai.get(0).getOwner());
+
+        if (isTakeowned) {
+          this.client.send("client/fin/takeown/" + this.listDai.get(0).getId());
+        } else {
+          throw new Exception("takeowned failed.");
         }
       } catch (Exception e) {
         logger.error(e.getMessage(), e);
