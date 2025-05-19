@@ -85,13 +85,13 @@ public class ServerHandler
 
           boolean isWritten = this.fileWriter.writeFile(tempFcm, retrievedFai.get());
           if (isWritten) {
-            Integer directoryId = retrievedFai.get().getId();
+            Integer directoryId = retrievedFai.get().getDirectoryId();
             DirectoryAccessInfo tempDai = this.listDai.stream()
                 .filter(dai -> dai.getId().equals(directoryId))
                 .findFirst()
                 .orElse(null);
             int prevCopied = tempDai.getCopied();
-            tempDai.setCopied(prevCopied++);
+            tempDai.setCopied(prevCopied + 1);
             this.client.send("client/" + "ok/copy/" + retrievedFai.get().getId());
           }
         } else {
@@ -106,7 +106,13 @@ public class ServerHandler
           this.fileCounter = 0;
           this.readyToReceive = false;
           logger.info("All files received. HOORAYYYYYYY");
-          this.client.send("client/fin/copy/");
+          try{
+            DirectoryAccessInfo tempDai = this.listDai.get(0);
+            this.client.send("client/fin/copy/"+tempDai.getId());
+          } catch(Exception e){
+            logger.error(e.getMessage(), e);
+          }
+          
 
           return;
         } else {
@@ -128,6 +134,9 @@ public class ServerHandler
     if (message.startsWith("metadata/copy/")) {
       String json = message.substring(14);
       ObjectMapper mapper = new ObjectMapper();
+      mapper.enable(SerializationFeature.INDENT_OUTPUT);
+      logger.info("yeyeyeyeyeyeyeyey");
+      logger.info(json);
 
       try {
         this.context = mapper.readValue(json, Context.class);
