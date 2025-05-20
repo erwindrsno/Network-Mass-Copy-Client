@@ -184,7 +184,10 @@ public class ServerHandler
         Path path = Path.of(this.listDai.get(0).getPath());
 
         try {
-          deleteDirectoryRecursively(path);
+          boolean isDeleted = deleteDirectoryRecursively(path);
+          if (isDeleted) {
+            this.client.send("client/fin/delete/" + this.listDai.get(0).getId());
+          }
         } catch (Exception e) {
           logger.error(e.getMessage(), e);
         }
@@ -195,24 +198,30 @@ public class ServerHandler
     }
   }
 
-  public void deleteDirectoryRecursively(Path path) throws IOException {
+  public boolean deleteDirectoryRecursively(Path path) {
     if (!Files.exists(path))
-      return;
+      return true; // Nothing to delete is also "successful"
 
-    Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+    try {
+      Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
 
-      @Override
-      public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-        Files.delete(file);
-        return FileVisitResult.CONTINUE;
-      }
+        @Override
+        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+          Files.delete(file);
+          return FileVisitResult.CONTINUE;
+        }
 
-      @Override
-      public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-        Files.delete(dir);
-        return FileVisitResult.CONTINUE;
-      }
-    });
+        @Override
+        public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+          Files.delete(dir);
+          return FileVisitResult.CONTINUE;
+        }
+      });
+      return true; // If we got here, all deletions succeeded
+    } catch (IOException e) {
+      logger.error("Failed to delete directory: " + path, e);
+      return false;
+    }
   }
 
 }
