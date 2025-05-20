@@ -172,7 +172,7 @@ public class ServerHandler
         logger.error(e.getMessage(), e);
       }
     } else if (message.startsWith("metadata/delete/")) {
-      String json = message.substring(17);
+      String json = message.substring(16);
       try {
         ObjectMapper mapper = new ObjectMapper();
         this.context = mapper.readValue(json, Context.class);
