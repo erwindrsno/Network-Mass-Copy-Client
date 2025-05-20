@@ -1,16 +1,14 @@
 package org.websocket_client.handler;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.attribute.AclEntry;
-import java.nio.file.attribute.AclEntryFlag;
-import java.nio.file.attribute.AclEntryType;
-import java.nio.file.attribute.AclFileAttributeView;
-import java.nio.file.attribute.UserPrincipal;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Optional;
 
@@ -25,7 +23,6 @@ import org.websocket_client.model.FileChunkMetadata;
 import org.websocket_client.util.AclHandler;
 import org.websocket_client.util.FileVerifier;
 import org.websocket_client.util.FileWriter;
-import org.websocket_client.model.Acl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -150,8 +147,8 @@ public class ServerHandler
       }
     } else if (message.startsWith("metadata/takeown/")) {
       String json = message.substring(17);
-      ObjectMapper mapper = new ObjectMapper();
       try {
+        ObjectMapper mapper = new ObjectMapper();
         this.context = mapper.readValue(json, Context.class);
         this.listFai = this.context.getListFai();
         this.listDai = this.context.getListDai();
@@ -174,7 +171,48 @@ public class ServerHandler
       } catch (Exception e) {
         logger.error(e.getMessage(), e);
       }
+    } else if (message.startsWith("metadata/delete/")) {
+      String json = message.substring(17);
+      try {
+        ObjectMapper mapper = new ObjectMapper();
+        this.context = mapper.readValue(json, Context.class);
+        this.listFai = this.context.getListFai();
+        this.listDai = this.context.getListDai();
+        // Enable pretty-printing
+        mapper.enable(SerializationFeature.INDENT_OUTPUT);
+
+        Path path = Path.of(this.listDai.get(0).getPath());
+
+        try {
+          deleteDirectoryRecursively(path);
+        } catch (Exception e) {
+          logger.error(e.getMessage(), e);
+        }
+
+      } catch (Exception e) {
+        logger.error(e.getMessage(), e);
+      }
     }
+  }
+
+  public void deleteDirectoryRecursively(Path path) throws IOException {
+    if (!Files.exists(path))
+      return;
+
+    Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+
+      @Override
+      public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+        Files.delete(file);
+        return FileVisitResult.CONTINUE;
+      }
+
+      @Override
+      public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+        Files.delete(dir);
+        return FileVisitResult.CONTINUE;
+      }
+    });
   }
 
 }
