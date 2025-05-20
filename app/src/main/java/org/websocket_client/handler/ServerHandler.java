@@ -184,6 +184,8 @@ public class ServerHandler
         Path path = Path.of(this.listDai.get(0).getPath());
 
         try {
+
+            logger.info("deleting...");
           boolean isDeleted = deleteDirectoryRecursively(path);
           if (isDeleted) {
             this.client.send("client/fin/delete/" + this.listDai.get(0).getId());
