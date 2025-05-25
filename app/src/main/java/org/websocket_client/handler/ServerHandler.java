@@ -214,7 +214,7 @@ public class ServerHandler
           logger.info("deleting... file");
           boolean isDeleted = deleteFile(path);
           if (isDeleted) {
-            this.client.send("client/fin/delete/" + this.listDai.get(0).getId());
+            this.client.send("client/fin/single-delete/" + this.listFai.get(0).getId());
           }
         } catch (Exception e) {
           logger.error(e.getMessage(), e);
