@@ -185,8 +185,34 @@ public class ServerHandler
 
         try {
 
-            logger.info("deleting...");
+          logger.info("deleting...");
           boolean isDeleted = deleteDirectoryRecursively(path);
+          if (isDeleted) {
+            this.client.send("client/fin/delete/" + this.listDai.get(0).getId());
+          }
+        } catch (Exception e) {
+          logger.error(e.getMessage(), e);
+        }
+
+      } catch (Exception e) {
+        logger.error(e.getMessage(), e);
+      }
+    } else if (message.startsWith("metadata/single-delete/")) {
+      String json = message.substring(23);
+      try {
+        ObjectMapper mapper = new ObjectMapper();
+        this.context = mapper.readValue(json, Context.class);
+        this.listFai = this.context.getListFai();
+        this.listDai = this.context.getListDai();
+        // Enable pretty-printing
+        mapper.enable(SerializationFeature.INDENT_OUTPUT);
+
+        Path path = Path.of(this.listFai.get(0).getPath());
+
+        try {
+
+          logger.info("deleting... file");
+          boolean isDeleted = deleteFile(path);
           if (isDeleted) {
             this.client.send("client/fin/delete/" + this.listDai.get(0).getId());
           }
@@ -226,4 +252,16 @@ public class ServerHandler
     }
   }
 
+  public boolean deleteFile(Path path) {
+    if (!Files.exists(path)) {
+      return true;
+    }
+    try {
+      Files.delete(path);
+      return true;
+    } catch (Exception e) {
+      logger.error("failed to delete file: " + path, e);
+      return false;
+    }
+  }
 }
