@@ -87,7 +87,7 @@ public class AclHandler {
       AclEntry userEntry = AclEntry.newBuilder()
           .setType(AclEntryType.ALLOW)
           .setPrincipal(user)
-          .setPermissions(this.readExecutePermissions)
+          .setPermissions(targetPermissions)
           .setFlags(AclEntryFlag.FILE_INHERIT, AclEntryFlag.DIRECTORY_INHERIT)
           .build();
 
