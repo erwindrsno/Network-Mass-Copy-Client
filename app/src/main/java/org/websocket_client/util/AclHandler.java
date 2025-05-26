@@ -16,100 +16,102 @@ import org.websocket_client.model.Acl;
 import org.websocket_client.model.FileAccessInfo;
 
 public class AclHandler {
-    private Set<AclEntryPermission> adminPermissions = Acl.getAdminAcl();
-    private Set<AclEntryPermission> userPermissions = Acl.getUserAcl();
-    public AclHandler(){
+  private Set<AclEntryPermission> adminPermissions = Acl.getAdminAcl();
+  private Set<AclEntryPermission> userPermissions = Acl.getUserAcl();
 
-    }
-    
-    public void handleCopyAcl(Path path, FileAccessInfo fai){
-        try{
-            AclFileAttributeView view = Files.getFileAttributeView(path,
-                AclFileAttributeView.class);
+  public AclHandler() {
 
-            List<AclEntry> acl = view.getAcl();
-            List<AclEntry> oldAcl = List.copyOf(acl);
+  }
 
-            for (int i = 0; i < acl.size(); i++) {
-                AclEntry oldEntry = oldAcl.get(i);
+  public void handleCopyAcl(Path path, FileAccessInfo fai) {
+    try {
+      AclFileAttributeView view = Files.getFileAttributeView(path,
+          AclFileAttributeView.class);
 
-                AclEntry newEntry = AclEntry.newBuilder()
-                    .setType(AclEntryType.ALLOW)
-                    .setPrincipal(oldEntry.principal())
-                    .setPermissions(this.adminPermissions)
-                    .setFlags(AclEntryFlag.FILE_INHERIT, AclEntryFlag.DIRECTORY_INHERIT)
-                    .build();
+      List<AclEntry> acl = view.getAcl();
+      List<AclEntry> oldAcl = List.copyOf(acl);
 
-                acl.set(i, newEntry);
-                view.setAcl(acl);
-            }
+      for (int i = 0; i < acl.size(); i++) {
+        AclEntry oldEntry = oldAcl.get(i);
 
-            UserPrincipal administrator = path.getFileSystem().getUserPrincipalLookupService()
-                .lookupPrincipalByName("erwin");
-
-            // UserPrincipal administrator = path.getFileSystem().getUserPrincipalLookupService()
-            //     .lookupPrincipalByName("ftis\\administrator");
-
-            AclEntry adminEntry = AclEntry.newBuilder()
-                .setType(AclEntryType.ALLOW)
-                .setPrincipal(administrator)
-                .setPermissions(this.adminPermissions)
-                .setFlags(AclEntryFlag.FILE_INHERIT, AclEntryFlag.DIRECTORY_INHERIT)
-                .build();
-
-            acl.add(0, adminEntry);
-
-            UserPrincipal user = path.getFileSystem().getUserPrincipalLookupService()
-                .lookupPrincipalByName(fai.getOwner());
-
-            AclEntry userEntry = AclEntry.newBuilder()
-                .setType(AclEntryType.ALLOW)
-                .setPrincipal(user)
-                .setPermissions(this.userPermissions)
-                .setFlags(AclEntryFlag.FILE_INHERIT, AclEntryFlag.DIRECTORY_INHERIT)
-                .build();
-
-            acl.add(acl.size() - 1, userEntry);
-
-            view.setAcl(acl);
-        } catch(Exception e){
-            e.printStackTrace();
-        }
-    }
-
-    public boolean handleTakeownAcl(Path path, String owner){
-        try{
-            System.out.println("the parent is: " + path.getParent());
-
-            AclFileAttributeView view = Files.getFileAttributeView(path,
-            AclFileAttributeView.class);
-
-            UserPrincipal user = path.getFileSystem().getUserPrincipalLookupService()
-            .lookupPrincipalByName(owner);
-
-            List<AclEntry> acl = view.getAcl();
-            ListIterator<AclEntry> iterator = acl.listIterator();
-
-            while (iterator.hasNext()) {
-                AclEntry entry = iterator.next();
-                if (entry.principal().equals(user)) {
-                    iterator.remove(); // remove old entry
-                }
-            }
-
-            AclEntry denyEntry = AclEntry.newBuilder()
-            .setPrincipal(user)
-            .setType(AclEntryType.DENY)
-            .setPermissions(this.userPermissions)
+        AclEntry newEntry = AclEntry.newBuilder()
+            .setType(AclEntryType.ALLOW)
+            .setPrincipal(oldEntry.principal())
+            .setPermissions(this.adminPermissions)
             .setFlags(AclEntryFlag.FILE_INHERIT, AclEntryFlag.DIRECTORY_INHERIT)
             .build();
 
-            acl.add(0,denyEntry);
-            view.setAcl(acl);
-            return true;
-        } catch(Exception e){
-            e.printStackTrace();
-            return false;
-        }
+        acl.set(i, newEntry);
+        view.setAcl(acl);
+      }
+
+      UserPrincipal administrator = path.getFileSystem().getUserPrincipalLookupService()
+          .lookupPrincipalByName("ftis\\administrator");
+
+      // UserPrincipal administrator =
+      // path.getFileSystem().getUserPrincipalLookupService()
+      // .lookupPrincipalByName("ftis\\administrator");
+
+      AclEntry adminEntry = AclEntry.newBuilder()
+          .setType(AclEntryType.ALLOW)
+          .setPrincipal(administrator)
+          .setPermissions(this.adminPermissions)
+          .setFlags(AclEntryFlag.FILE_INHERIT, AclEntryFlag.DIRECTORY_INHERIT)
+          .build();
+
+      acl.add(0, adminEntry);
+
+      UserPrincipal user = path.getFileSystem().getUserPrincipalLookupService()
+          .lookupPrincipalByName(fai.getOwner());
+
+      AclEntry userEntry = AclEntry.newBuilder()
+          .setType(AclEntryType.ALLOW)
+          .setPrincipal(user)
+          .setPermissions(this.userPermissions)
+          .setFlags(AclEntryFlag.FILE_INHERIT, AclEntryFlag.DIRECTORY_INHERIT)
+          .build();
+
+      acl.add(acl.size() - 1, userEntry);
+
+      view.setAcl(acl);
+    } catch (Exception e) {
+      e.printStackTrace();
     }
+  }
+
+  public boolean handleTakeownAcl(Path path, String owner) {
+    try {
+      System.out.println("the parent is: " + path.getParent());
+
+      AclFileAttributeView view = Files.getFileAttributeView(path,
+          AclFileAttributeView.class);
+
+      UserPrincipal user = path.getFileSystem().getUserPrincipalLookupService()
+          .lookupPrincipalByName(owner);
+
+      List<AclEntry> acl = view.getAcl();
+      ListIterator<AclEntry> iterator = acl.listIterator();
+
+      while (iterator.hasNext()) {
+        AclEntry entry = iterator.next();
+        if (entry.principal().equals(user)) {
+          iterator.remove(); // remove old entry
+        }
+      }
+
+      AclEntry denyEntry = AclEntry.newBuilder()
+          .setPrincipal(user)
+          .setType(AclEntryType.DENY)
+          .setPermissions(this.userPermissions)
+          .setFlags(AclEntryFlag.FILE_INHERIT, AclEntryFlag.DIRECTORY_INHERIT)
+          .build();
+
+      acl.add(0, denyEntry);
+      view.setAcl(acl);
+      return true;
+    } catch (Exception e) {
+      e.printStackTrace();
+      return false;
+    }
+  }
 }
