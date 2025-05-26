@@ -6,7 +6,6 @@ import java.nio.file.StandardOpenOption;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.websocket_client.Client;
 import org.websocket_client.model.FileAccessInfo;
 import org.websocket_client.model.FileChunkMetadata;
 
@@ -18,7 +17,7 @@ public class FileWriter {
 
   @Inject
   public FileWriter(AclHandler aclHandler) {
-    this.logger = LoggerFactory.getLogger(Client.class);
+    this.logger = LoggerFactory.getLogger(FileWriter.class);
     this.aclHandler = aclHandler;
   }
 

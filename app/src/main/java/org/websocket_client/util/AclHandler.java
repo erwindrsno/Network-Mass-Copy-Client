@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.websocket_client.model.Acl;
 import org.websocket_client.model.FileAccessInfo;
 
@@ -22,8 +24,10 @@ public class AclHandler {
   private Set<AclEntryPermission> writePermissions = Acl.getWriteAcl();
   private Set<AclEntryPermission> executePermissions = Acl.getExecuteAcl();
 
-  public AclHandler() {
+  private Logger logger;
 
+  public AclHandler() {
+    this.logger = LoggerFactory.getLogger(AclHandler.class);
   }
 
   public void handleCopyAcl(Path path, FileAccessInfo fai) {
@@ -49,7 +53,7 @@ public class AclHandler {
       }
 
       UserPrincipal administrator = path.getFileSystem().getUserPrincipalLookupService()
-          .lookupPrincipalByName("ftis\\administrator");
+          .lookupPrincipalByName("erwin");
 
       // UserPrincipal administrator =
       // path.getFileSystem().getUserPrincipalLookupService()

@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.websocket_client.handler.ServerHandler;
 import org.websocket_client.util.AclHandler;
+import org.websocket_client.util.FileRemover;
 import org.websocket_client.util.FileVerifier;
 import org.websocket_client.util.FileWriter;
 
@@ -24,6 +25,7 @@ public class WebSocketModule extends AbstractModule {
     bind(FileVerifier.class).in(Singleton.class);
     bind(FileWriter.class).in(Singleton.class);
     bind(AclHandler.class).in(Singleton.class);
+    bind(FileRemover.class).in(Singleton.class);
   }
 
   @Provides

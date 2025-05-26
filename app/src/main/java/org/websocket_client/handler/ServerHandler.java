@@ -21,6 +21,7 @@ import org.websocket_client.model.DirectoryAccessInfo;
 import org.websocket_client.model.FileAccessInfo;
 import org.websocket_client.model.FileChunkMetadata;
 import org.websocket_client.util.AclHandler;
+import org.websocket_client.util.FileRemover;
 import org.websocket_client.util.FileVerifier;
 import org.websocket_client.util.FileWriter;
 
@@ -44,9 +45,10 @@ public class ServerHandler
   private Client client;
   private FileWriter fileWriter;
   private AclHandler aclHandler;
+  private FileRemover fileRemover;
 
   @Inject
-  public ServerHandler(FileVerifier fileVerifier, Client client, FileWriter fileWriter, AclHandler aclHandler) {
+  public ServerHandler(FileVerifier fileVerifier, Client client, FileWriter fileWriter, AclHandler aclHandler, FileRemover fileRemover) {
     this.logger = LoggerFactory.getLogger(WebSocketModule.class);
     this.context = null;
     this.fileVerifier = fileVerifier;
@@ -56,6 +58,7 @@ public class ServerHandler
     this.client = client;
     this.fileWriter = fileWriter;
     this.aclHandler = aclHandler;
+    this.fileRemover = fileRemover;
   }
 
   @Override
@@ -186,7 +189,7 @@ public class ServerHandler
         try {
 
           logger.info("deleting...");
-          boolean isDeleted = deleteDirectoryRecursively(path);
+          boolean isDeleted = this.fileRemover.deleteDirectory(path);
           if (isDeleted) {
             this.client.send("client/fin/delete/" + this.listDai.get(0).getId());
           }
@@ -212,7 +215,7 @@ public class ServerHandler
         try {
 
           logger.info("deleting... file");
-          boolean isDeleted = deleteFile(path);
+          boolean isDeleted = this.fileRemover.deleteFile(path);
           if (isDeleted) {
             this.client.send("client/fin/single-delete/" + this.listFai.get(0).getId());
           }
@@ -223,45 +226,6 @@ public class ServerHandler
       } catch (Exception e) {
         logger.error(e.getMessage(), e);
       }
-    }
-  }
-
-  public boolean deleteDirectoryRecursively(Path path) {
-    if (!Files.exists(path))
-      return true; // Nothing to delete is also "successful"
-
-    try {
-      Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
-
-        @Override
-        public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-          Files.delete(file);
-          return FileVisitResult.CONTINUE;
-        }
-
-        @Override
-        public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-          Files.delete(dir);
-          return FileVisitResult.CONTINUE;
-        }
-      });
-      return true; // If we got here, all deletions succeeded
-    } catch (IOException e) {
-      logger.error("Failed to delete directory: " + path, e);
-      return false;
-    }
-  }
-
-  public boolean deleteFile(Path path) {
-    if (!Files.exists(path)) {
-      return true;
-    }
-    try {
-      Files.delete(path);
-      return true;
-    } catch (Exception e) {
-      logger.error("failed to delete file: " + path, e);
-      return false;
     }
   }
 }
