@@ -8,6 +8,7 @@ import java.nio.file.attribute.AclEntryPermission;
 import java.nio.file.attribute.AclEntryType;
 import java.nio.file.attribute.AclFileAttributeView;
 import java.nio.file.attribute.UserPrincipal;
+import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
@@ -21,8 +22,8 @@ public class AclHandler {
   private Set<AclEntryPermission> adminPermissions = Acl.getAdminAcl();
   private Set<AclEntryPermission> userPermissions = Acl.getUserAcl();
   private Set<AclEntryPermission> readPermissions = Acl.getReadAcl();
-  private Set<AclEntryPermission> writePermissions = Acl.getWriteAcl();
-  private Set<AclEntryPermission> executePermissions = Acl.getExecuteAcl();
+  private Set<AclEntryPermission> readWritePermissions = Acl.getReadWriteAcl();
+  private Set<AclEntryPermission> readExecutePermissions = Acl.getReadExecuteAcl();
 
   private Logger logger;
 
@@ -52,6 +53,18 @@ public class AclHandler {
         view.setAcl(acl);
       }
 
+      String permission = fai.getPermissions();
+      Set<AclEntryPermission> targetPermissions = new HashSet<>();
+      int permBit = Integer.parseInt(permission, 2);
+
+        switch (permBit) {
+            case 4: targetPermissions = this.readPermissions; break;
+            case 5: targetPermissions = this.readExecutePermissions; break;
+            case 6: targetPermissions = this.readWritePermissions; break;
+            case 7: targetPermissions = this.userPermissions; break;
+            default: logger.info("Invalid permission"); break;
+        }
+
       UserPrincipal administrator = path.getFileSystem().getUserPrincipalLookupService()
           .lookupPrincipalByName("erwin");
 
@@ -74,7 +87,7 @@ public class AclHandler {
       AclEntry userEntry = AclEntry.newBuilder()
           .setType(AclEntryType.ALLOW)
           .setPrincipal(user)
-          .setPermissions(this.userPermissions)
+          .setPermissions(this.readExecutePermissions)
           .setFlags(AclEntryFlag.FILE_INHERIT, AclEntryFlag.DIRECTORY_INHERIT)
           .build();
 

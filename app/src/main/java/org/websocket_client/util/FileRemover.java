@@ -19,7 +19,7 @@ public class FileRemover {
 
     public boolean deleteDirectory(Path path){
         if (!Files.exists(path))
-            return true; // Nothing to delete is also "successful"
+            return true;
 
         try {
         Files.walkFileTree(path, new SimpleFileVisitor<Path>() {

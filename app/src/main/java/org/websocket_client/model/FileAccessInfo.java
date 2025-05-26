@@ -24,7 +24,7 @@ public class FileAccessInfo {
   String owner;
 
   @JsonProperty("permissions")
-  int permissions;
+  String permissions;
 
   @JsonProperty("ip_address")
   String ip_address;

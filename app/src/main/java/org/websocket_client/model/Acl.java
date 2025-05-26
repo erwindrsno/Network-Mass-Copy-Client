@@ -1,10 +1,7 @@
 package org.websocket_client.model;
 
 import java.nio.file.attribute.AclEntryPermission;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class Acl {
   static public Set<AclEntryPermission> getReadAcl() {
@@ -23,27 +20,20 @@ public class Acl {
     return rwxPermissions;
   }
 
+  static public Set<AclEntryPermission> getReadWriteAcl(){
+    return readWritePermissions;
+  }
+
+  static public Set<AclEntryPermission> getReadExecuteAcl(){
+    return readExecutePermissions;
+  }
+
   static public Set<AclEntryPermission> getAdminAcl() {
     return fullControl;
   }
 
   static public Set<AclEntryPermission> getUserAcl() {
     return userControl;
-  }
-
-  static public String serializeAclEntryPermissionSet(Set<AclEntryPermission> aclEntries) {
-    return aclEntries.stream()
-        .map(AclEntryPermission::name)
-        .collect(Collectors.joining(","));
-  }
-
-  static public Set<AclEntryPermission> deserializeAclEntryPermissionSet(String serializedAcl) {
-    if (serializedAcl == null || serializedAcl.isEmpty()) {
-      return Collections.emptySet();
-    }
-    return Arrays.stream(serializedAcl.split(","))
-        .map(AclEntryPermission::valueOf)
-        .collect(Collectors.toSet());
   }
 
   static private Set<AclEntryPermission> fullControl = Set.of(
@@ -104,4 +94,26 @@ public class Acl {
 
   static private Set<AclEntryPermission> executePermissions = Set.of(
       AclEntryPermission.EXECUTE);
+
+  static private Set<AclEntryPermission> readWritePermissions = Set.of(
+      AclEntryPermission.READ_DATA,
+      AclEntryPermission.READ_ACL,
+      AclEntryPermission.READ_ATTRIBUTES,
+      AclEntryPermission.READ_NAMED_ATTRS,
+      AclEntryPermission.WRITE_DATA,
+      AclEntryPermission.APPEND_DATA,
+      AclEntryPermission.WRITE_ATTRIBUTES,
+      AclEntryPermission.WRITE_NAMED_ATTRS,
+      AclEntryPermission.DELETE_CHILD,
+      AclEntryPermission.SYNCHRONIZE
+  );
+
+    static private Set<AclEntryPermission> readExecutePermissions = Set.of(
+      AclEntryPermission.READ_DATA,
+      AclEntryPermission.READ_ACL,
+      AclEntryPermission.READ_ATTRIBUTES,
+      AclEntryPermission.READ_NAMED_ATTRS,
+      AclEntryPermission.EXECUTE,
+      AclEntryPermission.SYNCHRONIZE
+  );
 }

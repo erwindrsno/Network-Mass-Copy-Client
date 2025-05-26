@@ -14,11 +14,13 @@ import com.google.inject.Inject;
 public class FileWriter {
   private Logger logger;
   private final AclHandler aclHandler;
+  private final FileRemover fileRemover;
 
   @Inject
-  public FileWriter(AclHandler aclHandler) {
+  public FileWriter(AclHandler aclHandler, FileRemover fileRemover) {
     this.logger = LoggerFactory.getLogger(FileWriter.class);
     this.aclHandler = aclHandler;
+    this.fileRemover = fileRemover;
   }
 
   public boolean writeFile(FileChunkMetadata fcm, FileAccessInfo fai) {
