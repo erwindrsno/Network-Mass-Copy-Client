@@ -18,6 +18,9 @@ import org.websocket_client.model.FileAccessInfo;
 public class AclHandler {
   private Set<AclEntryPermission> adminPermissions = Acl.getAdminAcl();
   private Set<AclEntryPermission> userPermissions = Acl.getUserAcl();
+  private Set<AclEntryPermission> readPermissions = Acl.getReadAcl();
+  private Set<AclEntryPermission> writePermissions = Acl.getWriteAcl();
+  private Set<AclEntryPermission> executePermissions = Acl.getExecuteAcl();
 
   public AclHandler() {
 
