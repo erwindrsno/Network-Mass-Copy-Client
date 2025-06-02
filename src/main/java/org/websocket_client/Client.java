@@ -44,6 +44,8 @@ public class Client extends WebSocketClient {
 
   FileMetadata fileMetadata;
 
+  private List<FileMetadata> listFileMetadata;
+  private List<Map<Integer, byte[]>> listOfChunkMaps;
   List<Path> listPath = new ArrayList<>();
   List<FileOutputStream> listFos = new ArrayList<>();
   int receiveFileCounter = 0;
@@ -98,6 +100,20 @@ public class Client extends WebSocketClient {
       } catch (Exception e) {
         e.printStackTrace();
       }
+    } else if (message.startsWith("DEL|")) {
+      String toDeleteFileName = message.substring(message.indexOf('|') + 1);
+      Path toDeletePath = Paths.get(toDeleteFileName);
+
+      try {
+        boolean isDeleted = Files.deleteIfExists(toDeletePath);
+        if (isDeleted) {
+          logger.info("File is deleted.");
+        } else {
+          logger.info("File is not EXIST");
+        }
+      } catch (Exception e) {
+        logger.error(e.getMessage());
+      }
     } else if (message.startsWith("server/")) {
       this.serverHandler.handleString(message.substring(7));
     }
@@ -117,4 +133,26 @@ public class Client extends WebSocketClient {
   public void onError(Exception ex) {
     System.err.println("an error occurred:" + ex);
   }
+
+  // public void clearAllListAndMap() {
+  //   for (Map<Integer, byte[]> map : this.listOfChunkMaps) {
+  //     map.clear();
+  //   }
+  //   this.listOfChunkMaps.clear();
+  //   this.listFileMetadata.clear();
+  //   this.listPath.clear();
+  //   this.listFos.clear();
+  //   this.receiveFileCounter = 0;
+  //   this.receiveChunkCounter = 0;
+  //   this.entryId = null;
+  //   this.title = "";
+  // }
 }
+
+// Catatan Utama
+// - Mekanisme monitoring client sudah ada, dengan cara pinging. Tapi coba cara
+// lain.
+// - Protocol SEND_FILE sudah ada, dan sudah coba implementasi.
+
+// Catanan Tugas
+// - Coba monitoring menggunakan onOpen dan onClose.

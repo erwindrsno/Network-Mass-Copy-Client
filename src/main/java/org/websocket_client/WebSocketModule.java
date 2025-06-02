@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.websocket_client.handler.ServerHandler;
 import org.websocket_client.util.AclHandler;
-import org.websocket_client.util.FileRemover;
 import org.websocket_client.util.FileVerifier;
 import org.websocket_client.util.FileWriter;
 
@@ -19,13 +18,12 @@ import com.google.inject.name.Names;
 public class WebSocketModule extends AbstractModule {
   @Override
   protected void configure() {
-    bind(String.class).annotatedWith(Names.named("host")).toInstance("10.100.70.211");
+    bind(String.class).annotatedWith(Names.named("host")).toInstance("10.100.75.112");
     bind(Integer.class).annotatedWith(Names.named("port")).toInstance(8887);
     bind(ServerHandler.class).in(Singleton.class);
     bind(FileVerifier.class).in(Singleton.class);
     bind(FileWriter.class).in(Singleton.class);
     bind(AclHandler.class).in(Singleton.class);
-    bind(FileRemover.class).in(Singleton.class);
   }
 
   @Provides
@@ -40,8 +38,7 @@ public class WebSocketModule extends AbstractModule {
   public Client provideClient(Logger logger, @Named("host") String host,
       @Named("port") int port) {
     try {
-      // URI uri = new URI("ws://192.168.0.114:8887");
-      URI uri = new URI("ws://" + host + ":" + port);
+      URI uri = new URI("ws://192.168.0.114:8887");
       return new Client(uri);
     } catch (Exception e) {
       logger.error(e.getMessage(), e);
