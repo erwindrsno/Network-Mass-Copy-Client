@@ -1,20 +1,14 @@
 package org.websocket_client;
 
-import java.io.ByteArrayInputStream;
 import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
 import java.net.URI;
 import java.nio.ByteBuffer;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.nio.file.attribute.AclEntryPermission;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft;
@@ -23,7 +17,6 @@ import org.slf4j.*;
 import org.websocket_client.handler.ServerHandler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.hash.Hashing;
 import com.google.inject.Inject;
 
 public class Client extends WebSocketClient {
