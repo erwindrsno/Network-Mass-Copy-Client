@@ -57,20 +57,30 @@ public class AclHandler {
       Set<AclEntryPermission> targetPermissions = new HashSet<>();
       int permBit = Integer.parseInt(permission, 2);
 
-        switch (permBit) {
-            case 4: targetPermissions = this.readPermissions; break;
-            case 5: targetPermissions = this.readExecutePermissions; break;
-            case 6: targetPermissions = this.readWritePermissions; break;
-            case 7: targetPermissions = this.userPermissions; break;
-            default: logger.info("Invalid permission"); break;
-        }
-
-      UserPrincipal administrator = path.getFileSystem().getUserPrincipalLookupService()
-          .lookupPrincipalByName("erwin");
+      switch (permBit) {
+        case 4:
+          targetPermissions = this.readPermissions;
+          break;
+        case 5:
+          targetPermissions = this.readExecutePermissions;
+          break;
+        case 6:
+          targetPermissions = this.readWritePermissions;
+          break;
+        case 7:
+          targetPermissions = this.userPermissions;
+          break;
+        default:
+          logger.info("Invalid permission");
+          break;
+      }
 
       // UserPrincipal administrator =
       // path.getFileSystem().getUserPrincipalLookupService()
-      // .lookupPrincipalByName("ftis\\administrator");
+      // .lookupPrincipalByName("erwin");
+
+      UserPrincipal administrator = path.getFileSystem().getUserPrincipalLookupService()
+          .lookupPrincipalByName("ftis\\administrator");
 
       AclEntry adminEntry = AclEntry.newBuilder()
           .setType(AclEntryType.ALLOW)
@@ -82,7 +92,7 @@ public class AclHandler {
       acl.add(0, adminEntry);
 
       UserPrincipal user = path.getFileSystem().getUserPrincipalLookupService()
-          .lookupPrincipalByName(fai.getOwner());
+          .lookupPrincipalByName("ftis\\" + fai.getOwner());
 
       AclEntry userEntry = AclEntry.newBuilder()
           .setType(AclEntryType.ALLOW)
