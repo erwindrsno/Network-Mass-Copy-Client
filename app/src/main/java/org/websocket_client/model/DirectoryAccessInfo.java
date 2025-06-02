@@ -20,12 +20,6 @@ public class DirectoryAccessInfo {
   @JsonProperty("path")
   String path;
 
-  @JsonProperty("file_count")
-  Integer fileCount;
-
-  @JsonProperty("copied")
-  Integer copied;
-
   @JsonProperty("owner")
   String owner;
 }
