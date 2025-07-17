@@ -29,3 +29,5 @@ app/.env
 app/.factorypath
 
 app/.project
+
+app/bin/
