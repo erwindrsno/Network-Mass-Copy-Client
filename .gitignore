@@ -5,3 +5,27 @@
 build
 
 .env
+
+.idea/
+
+.settings/
+
+.DS_Store
+
+.classpath
+
+.factorypath
+
+.project
+
+app/.settings/
+
+app/.DS_Store
+
+app/.classpath
+
+app/.env
+
+app/.factorypath
+
+app/.project
