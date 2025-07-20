@@ -2,7 +2,6 @@ package org.websocket_client.util;
 
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
-import com.google.inject.Inject;
 
 public class FileVerifier {
   // hasher bersifat stateful, dan tidak dapat di clear
