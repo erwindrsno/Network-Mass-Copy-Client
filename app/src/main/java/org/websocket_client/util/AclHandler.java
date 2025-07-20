@@ -10,7 +10,6 @@ import java.nio.file.attribute.AclEntryType;
 import java.nio.file.attribute.AclFileAttributeView;
 import java.nio.file.attribute.UserPrincipal;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Set;
 
 import org.slf4j.Logger;
