@@ -70,14 +70,8 @@ public class AclHandler {
           .lookupPrincipalByName(owner);
 
       List<AclEntry> acl = view.getAcl();
-      ListIterator<AclEntry> iterator = acl.listIterator();
 
-      while (iterator.hasNext()) {
-        AclEntry entry = iterator.next();
-        if (entry.principal().equals(user)) {
-          iterator.remove(); // remove old entry
-        }
-      }
+      acl.removeIf(entry -> user.equals(entry.principal()));
 
       AclEntry userDenyEntry = this.buildAclEntry(user, this.userPermissions, false);
 
@@ -121,7 +115,6 @@ public class AclHandler {
       case 7:
         return this.userPermissions;
       default:
-        logger.info("Invalid permission");
         logger.warn("Invalid permission bit: {}", permissions);
         return Set.of();
     }
@@ -144,7 +137,7 @@ public class AclHandler {
           acl.set(i, newEntry);
         }
       }
-      view.setAcl(acl);
+      // view.setAcl(acl);
     } catch (IOException e) {
       logger.error(e.getMessage(), e);
     }
