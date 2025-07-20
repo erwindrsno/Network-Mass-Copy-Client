@@ -1,5 +1,6 @@
 package org.websocket_client.util;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.AclEntry;
@@ -8,7 +9,6 @@ import java.nio.file.attribute.AclEntryPermission;
 import java.nio.file.attribute.AclEntryType;
 import java.nio.file.attribute.AclFileAttributeView;
 import java.nio.file.attribute.UserPrincipal;
-import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
@@ -19,11 +19,11 @@ import org.websocket_client.model.Acl;
 import org.websocket_client.model.FileAccessInfo;
 
 public class AclHandler {
-  private Set<AclEntryPermission> adminPermissions = Acl.getAdminAcl();
-  private Set<AclEntryPermission> userPermissions = Acl.getUserAcl();
-  private Set<AclEntryPermission> readPermissions = Acl.getReadAcl();
-  private Set<AclEntryPermission> readWritePermissions = Acl.getReadWriteAcl();
-  private Set<AclEntryPermission> readExecutePermissions = Acl.getReadExecuteAcl();
+  private final Set<AclEntryPermission> adminPermissions = Acl.getAdminAcl();
+  private final Set<AclEntryPermission> userPermissions = Acl.getUserAcl();
+  private final Set<AclEntryPermission> readPermissions = Acl.getReadAcl();
+  private final Set<AclEntryPermission> readWritePermissions = Acl.getReadWriteAcl();
+  private final Set<AclEntryPermission> readExecutePermissions = Acl.getReadExecuteAcl();
 
   private Logger logger;
 
@@ -35,66 +35,34 @@ public class AclHandler {
     try {
       AclFileAttributeView view = Files.getFileAttributeView(path,
           AclFileAttributeView.class);
-
       List<AclEntry> acl = view.getAcl();
-      List<AclEntry> oldAcl = List.copyOf(acl);
 
-      for (int i = 0; i < acl.size(); i++) {
-        AclEntry oldEntry = oldAcl.get(i);
-
-        AclEntry newEntry = AclEntry.newBuilder()
-            .setType(AclEntryType.ALLOW)
-            .setPrincipal(oldEntry.principal())
-            .setPermissions(this.adminPermissions)
-            .setFlags(AclEntryFlag.FILE_INHERIT, AclEntryFlag.DIRECTORY_INHERIT)
-            .build();
-
-        acl.set(i, newEntry);
-        view.setAcl(acl);
-      }
-
-      String permission = fai.getPermissions();
-      Set<AclEntryPermission> targetPermissions = new HashSet<>();
-      int permBit = Integer.parseInt(permission, 2);
-
-      // UserPrincipal administrator =
-      // path.getFileSystem().getUserPrincipalLookupService()
-      // .lookupPrincipalByName("erwin");
+      this.removeInherittedPermissions(view);
 
       UserPrincipal administrator = path.getFileSystem().getUserPrincipalLookupService()
           .lookupPrincipalByName("ftis\\administrator");
-
-      AclEntry adminEntry = AclEntry.newBuilder()
-          .setType(AclEntryType.ALLOW)
-          .setPrincipal(administrator)
-          .setPermissions(this.adminPermissions)
-          .setFlags(AclEntryFlag.FILE_INHERIT, AclEntryFlag.DIRECTORY_INHERIT)
-          .build();
-
-      acl.add(0, adminEntry);
-
       UserPrincipal user = path.getFileSystem().getUserPrincipalLookupService()
           .lookupPrincipalByName("ftis\\" + fai.getOwner());
 
-      AclEntry userEntry = AclEntry.newBuilder()
-          .setType(AclEntryType.ALLOW)
-          .setPrincipal(user)
-          .setPermissions(targetPermissions)
-          .setFlags(AclEntryFlag.FILE_INHERIT, AclEntryFlag.DIRECTORY_INHERIT)
-          .build();
+      AclEntry adminEntry = buildAclEntry(administrator, this.adminPermissions, true);
+      if (adminEntry != null) {
+        acl.add(0, adminEntry);
+      }
 
-      acl.add(acl.size() - 1, userEntry);
+      Set<AclEntryPermission> targetPermissions = resolveEntryPermissionBits(fai.getPermissions());
+      AclEntry userEntry = buildAclEntry(user, targetPermissions, true);
+      if (userEntry != null) {
+        acl.add(userEntry);
+      }
 
       view.setAcl(acl);
     } catch (Exception e) {
-      e.printStackTrace();
+      logger.error(e.getMessage(), e);
     }
   }
 
   public boolean handleTakeownAcl(Path path, String owner) {
     try {
-      System.out.println("the parent is: " + path.getParent());
-
       AclFileAttributeView view = Files.getFileAttributeView(path,
           AclFileAttributeView.class);
 
@@ -111,15 +79,11 @@ public class AclHandler {
         }
       }
 
-      AclEntry denyEntry = AclEntry.newBuilder()
-          .setPrincipal(user)
-          .setType(AclEntryType.DENY)
-          .setPermissions(this.userPermissions)
-          .setFlags(AclEntryFlag.FILE_INHERIT, AclEntryFlag.DIRECTORY_INHERIT)
-          .build();
+      AclEntry userDenyEntry = this.buildAclEntry(user, this.userPermissions, false);
 
-      acl.add(0, denyEntry);
+      acl.add(0, userDenyEntry);
       view.setAcl(acl);
+
       return true;
     } catch (Exception e) {
       e.printStackTrace();
@@ -127,17 +91,15 @@ public class AclHandler {
     }
   }
 
-  private AclEntry buildAclEntry(Path path, UserPrincipal userPrincipal, boolean allowType) {
+  private AclEntry buildAclEntry(UserPrincipal userPrincipal,
+      Set<AclEntryPermission> aclEntryPermission, boolean allowType) {
     try {
-      AclFileAttributeView view = Files.getFileAttributeView(path,
-          AclFileAttributeView.class);
-
       AclEntryType aclEntryType = allowType ? AclEntryType.ALLOW : AclEntryType.DENY;
 
       return AclEntry.newBuilder()
           .setPrincipal(userPrincipal)
           .setType(aclEntryType)
-          .setPermissions(this.userPermissions)
+          .setPermissions(aclEntryPermission)
           .setFlags(AclEntryFlag.FILE_INHERIT, AclEntryFlag.DIRECTORY_INHERIT)
           .build();
 
@@ -147,7 +109,8 @@ public class AclHandler {
     }
   }
 
-  private Set<AclEntryPermission> resolveEntryPermissionBits(int permBit) {
+  private Set<AclEntryPermission> resolveEntryPermissionBits(String permissions) {
+    int permBit = Integer.parseInt(permissions, 2);
     switch (permBit) {
       case 4:
         return this.readPermissions;
@@ -159,23 +122,30 @@ public class AclHandler {
         return this.userPermissions;
       default:
         logger.info("Invalid permission");
-        return null;
+        logger.warn("Invalid permission bit: {}", permissions);
+        return Set.of();
     }
   }
 
-  private void removeOldUserEntry(AclFileAttributeView view, UserPrincipal userPrincipal) {
+  private void removeInherittedPermissions(AclFileAttributeView view) {
     try {
       List<AclEntry> acl = view.getAcl();
-      ListIterator<AclEntry> iterator = acl.listIterator();
+      List<AclEntry> oldAcl = List.copyOf(acl);
 
-      while (iterator.hasNext()) {
-        AclEntry entry = iterator.next();
-        if (entry.principal().equals(userPrincipal)) {
-          iterator.remove(); // remove old entry
-          return;
+      for (int i = 0; i < acl.size(); i++) {
+        AclEntry oldEntry = oldAcl.get(i);
+
+        AclEntry newEntry = buildAclEntry(
+            oldEntry.principal(),
+            oldEntry.permissions(),
+            true);
+
+        if (newEntry != null) {
+          acl.set(i, newEntry);
         }
       }
-    } catch (Exception e) {
+      view.setAcl(acl);
+    } catch (IOException e) {
       logger.error(e.getMessage(), e);
     }
   }
