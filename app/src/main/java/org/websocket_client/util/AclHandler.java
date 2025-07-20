@@ -57,24 +57,6 @@ public class AclHandler {
       Set<AclEntryPermission> targetPermissions = new HashSet<>();
       int permBit = Integer.parseInt(permission, 2);
 
-      switch (permBit) {
-        case 4:
-          targetPermissions = this.readPermissions;
-          break;
-        case 5:
-          targetPermissions = this.readExecutePermissions;
-          break;
-        case 6:
-          targetPermissions = this.readWritePermissions;
-          break;
-        case 7:
-          targetPermissions = this.userPermissions;
-          break;
-        default:
-          logger.info("Invalid permission");
-          break;
-      }
-
       // UserPrincipal administrator =
       // path.getFileSystem().getUserPrincipalLookupService()
       // .lookupPrincipalByName("erwin");
@@ -142,6 +124,59 @@ public class AclHandler {
     } catch (Exception e) {
       e.printStackTrace();
       return false;
+    }
+  }
+
+  private AclEntry buildAclEntry(Path path, UserPrincipal userPrincipal, boolean allowType) {
+    try {
+      AclFileAttributeView view = Files.getFileAttributeView(path,
+          AclFileAttributeView.class);
+
+      AclEntryType aclEntryType = allowType ? AclEntryType.ALLOW : AclEntryType.DENY;
+
+      return AclEntry.newBuilder()
+          .setPrincipal(userPrincipal)
+          .setType(aclEntryType)
+          .setPermissions(this.userPermissions)
+          .setFlags(AclEntryFlag.FILE_INHERIT, AclEntryFlag.DIRECTORY_INHERIT)
+          .build();
+
+    } catch (Exception e) {
+      logger.error(e.getMessage(), e);
+      return null;
+    }
+  }
+
+  private Set<AclEntryPermission> resolveEntryPermissionBits(int permBit) {
+    switch (permBit) {
+      case 4:
+        return this.readPermissions;
+      case 5:
+        return this.readExecutePermissions;
+      case 6:
+        return this.readWritePermissions;
+      case 7:
+        return this.userPermissions;
+      default:
+        logger.info("Invalid permission");
+        return null;
+    }
+  }
+
+  private void removeOldUserEntry(AclFileAttributeView view, UserPrincipal userPrincipal) {
+    try {
+      List<AclEntry> acl = view.getAcl();
+      ListIterator<AclEntry> iterator = acl.listIterator();
+
+      while (iterator.hasNext()) {
+        AclEntry entry = iterator.next();
+        if (entry.principal().equals(userPrincipal)) {
+          iterator.remove(); // remove old entry
+          return;
+        }
+      }
+    } catch (Exception e) {
+      logger.error(e.getMessage(), e);
     }
   }
 }

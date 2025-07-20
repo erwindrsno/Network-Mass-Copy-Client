@@ -3,7 +3,6 @@ package org.websocket_client;
 import java.nio.file.attribute.AclEntryPermission;
 import java.util.Set;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class FileMetadata {
@@ -28,38 +27,6 @@ public class FileMetadata {
     this.signature = signature;
     this.owner = owner;
   }
-
-  // public FileMetadata(
-  // @JsonProperty("fileSize") long fileSize,
-  // @JsonProperty("chunkSize") long chunkSize,
-  // @JsonProperty("chunkCount") long chunkCount,
-  // @JsonProperty("filename") String filename,
-  // @JsonProperty("owner") String owner,
-  // @JsonProperty("signature") String signature,
-  // @JsonProperty("aclEntry") Set<AclEntryPermission> aclEntry) {
-  // this.fileSize = fileSize;
-  // this.chunkSize = chunkSize;
-  // this.chunkCount = chunkCount;
-  // this.filename = filename;
-  // this.owner = owner;
-  // this.signature = signature;
-  // this.aclEntry = aclEntry;
-  // }
-  //
-  // public FileMetadata(
-  // @JsonProperty("chunkSize") long chunkSize,
-  // @JsonProperty("chunkCount") long chunkCount,
-  // @JsonProperty("filename") String filename,
-  // @JsonProperty("owner") String owner,
-  // @JsonProperty("signature") String signature,
-  // @JsonProperty("aclEntry") Set<AclEntryPermission> aclEntry) {
-  // this.chunkSize = chunkSize;
-  // this.chunkCount = chunkCount;
-  // this.filename = filename;
-  // this.owner = owner;
-  // this.signature = signature;
-  // this.aclEntry = aclEntry;
-  // }
 
   public FileMetadata() {
 

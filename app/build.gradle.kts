@@ -26,6 +26,8 @@ dependencies {
     testImplementation(libs.junit.jupiter)
 
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation("org.mockito:mockito-core:5.11.0")
+    testImplementation("org.mockito:mockito-junit-jupiter:5.11.0")
 
     // This dependency is used by the application.
     implementation(libs.guava)

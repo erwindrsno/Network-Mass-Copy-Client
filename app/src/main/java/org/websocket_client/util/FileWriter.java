@@ -14,16 +14,14 @@ import com.google.inject.Inject;
 public class FileWriter {
   private Logger logger;
   private final AclHandler aclHandler;
-  private final FileRemover fileRemover;
 
   @Inject
-  public FileWriter(AclHandler aclHandler, FileRemover fileRemover) {
+  public FileWriter(AclHandler aclHandler) {
     this.logger = LoggerFactory.getLogger(FileWriter.class);
     this.aclHandler = aclHandler;
-    this.fileRemover = fileRemover;
   }
 
-  public boolean writeFile(FileChunkMetadata fcm, FileAccessInfo fai) {
+  public boolean createDirectoryAndHandleAcl(FileAccessInfo fai) {
     try {
       Path path = Path.of(fai.getPath());
       Path parent = path.getParent();
@@ -31,16 +29,27 @@ public class FileWriter {
       // Delete the file if it exists
       Files.deleteIfExists(path);
 
-      if (parent != null) {
-        // Check if parent exists and is a directory
-        if (Files.exists(parent) && Files.isDirectory(parent)) {
-          logger.info("Parent is a directory.");
-        } else {
-          logger.info("Parent is not a directory or does not exist. Creating it...");
-          Files.createDirectories(parent);
-          this.aclHandler.handleCopyAcl(parent, fai);
-        }
+      if (Files.exists(parent) && Files.isDirectory(parent)) {
+        logger.info("Parent is a directory.");
+        Files.deleteIfExists(parent);
+      } else {
+        logger.info("Parent is not a directory or does not exist. Creating it...");
+        Files.createDirectories(parent);
+        this.aclHandler.handleCopyAcl(parent, fai);
       }
+      return true;
+    } catch (Exception e) {
+      logger.error(e.getMessage(), e);
+      return false;
+    }
+  }
+
+  public boolean writeFile(FileChunkMetadata fcm, FileAccessInfo fai) {
+    try {
+      Path path = Path.of(fai.getPath());
+
+      // Delete the file if it exists
+      Files.deleteIfExists(path);
 
       for (long i = 0; i < fcm.getChunkCount(); i++) {
         if (i == fcm.getChunkCount() - 1) {
@@ -49,7 +58,6 @@ public class FileWriter {
         Files.write(path, fcm.getMapOfChunks().get(i), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
       }
       return true;
-
     } catch (Exception e) {
       logger.error(e.getMessage(), e);
       return false;
