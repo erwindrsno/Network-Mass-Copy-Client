@@ -91,7 +91,7 @@ public class AclHandler {
     }
   }
 
-  private AclEntry buildAclEntry(UserPrincipal userPrincipal,
+  protected AclEntry buildAclEntry(UserPrincipal userPrincipal,
       Set<AclEntryPermission> aclEntryPermission, boolean allowType) {
     try {
       AclEntryType aclEntryType = allowType ? AclEntryType.ALLOW : AclEntryType.DENY;
@@ -109,7 +109,7 @@ public class AclHandler {
     }
   }
 
-  private Set<AclEntryPermission> resolveEntryPermissionBits(String permissions) {
+  protected Set<AclEntryPermission> resolveEntryPermissionBits(String permissions) {
     int permBit = Integer.parseInt(permissions, 2);
     switch (permBit) {
       case 4:
@@ -127,7 +127,7 @@ public class AclHandler {
     }
   }
 
-  private void removeInherittedPermissions(AclFileAttributeView view) {
+  protected void removeInherittedPermissions(AclFileAttributeView view) {
     try {
       List<AclEntry> acl = view.getAcl();
       List<AclEntry> oldAcl = List.copyOf(acl);

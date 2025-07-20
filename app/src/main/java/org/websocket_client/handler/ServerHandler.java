@@ -43,7 +43,8 @@ public class ServerHandler
   private FileRemover fileRemover;
 
   @Inject
-  public ServerHandler(FileVerifier fileVerifier, Client client, FileWriter fileWriter, AclHandler aclHandler, FileRemover fileRemover) {
+  public ServerHandler(FileVerifier fileVerifier, Client client, FileWriter fileWriter, AclHandler aclHandler,
+      FileRemover fileRemover) {
     this.logger = LoggerFactory.getLogger(WebSocketModule.class);
     this.context = null;
     this.fileVerifier = fileVerifier;
@@ -184,7 +185,7 @@ public class ServerHandler
         try {
 
           logger.info("deleting...");
-          boolean isDeleted = this.fileRemover.deleteDirectory(path);
+          boolean isDeleted = this.fileRemover.deleteDirectoryRecursively(path);
           if (isDeleted) {
             this.client.send("client/fin/delete/" + this.listDai.get(0).getId());
           }

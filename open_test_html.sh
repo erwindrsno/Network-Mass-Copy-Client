@@ -1,0 +1,1 @@
+open app/build/reports/tests/test/index.html

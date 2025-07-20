@@ -17,7 +17,7 @@ public class FileRemover {
     this.logger = LoggerFactory.getLogger(FileRemover.class);
   }
 
-  public boolean deleteDirectory(Path path) {
+  public boolean deleteDirectoryRecursively(Path path) {
     if (!Files.exists(path))
       return true;
 
