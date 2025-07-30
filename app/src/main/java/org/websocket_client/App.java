@@ -14,9 +14,7 @@ public class App {
   public static void main(String[] args) throws URISyntaxException {
     Injector injector = Guice.createInjector(new WebSocketModule());
     Client client = injector.getInstance(Client.class);
-    ServerHandler serverHandler = injector.getInstance(ServerHandler.class);
     System.out.println("Connecting...");
-    client.injectDependencies(serverHandler);
     client.connect();
   }
 }

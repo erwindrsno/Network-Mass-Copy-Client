@@ -9,8 +9,6 @@ import org.java_websocket.handshake.ServerHandshake;
 import org.slf4j.*;
 import org.websocket_client.handler.ServerHandler;
 
-import com.google.inject.Inject;
-
 public class Client extends WebSocketClient {
   Logger logger = LoggerFactory.getLogger(Client.class);
 
@@ -20,12 +18,8 @@ public class Client extends WebSocketClient {
     super(serverUri, draft);
   }
 
-  public Client(URI serverURI) {
+  public Client(URI serverURI, ServerHandler serverHandler) {
     super(serverURI);
-  }
-
-  @Inject
-  public void injectDependencies(ServerHandler serverHandler) {
     this.serverHandler = serverHandler;
   }
 
