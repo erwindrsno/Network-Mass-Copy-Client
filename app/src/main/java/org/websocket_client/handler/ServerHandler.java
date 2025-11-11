@@ -209,7 +209,6 @@ public class ServerHandler
         Path path = Path.of(this.listFai.get(0).getPath());
 
         try {
-
           logger.info("deleting... file");
           boolean isDeleted = this.fileRemover.deleteFile(path);
           if (isDeleted) {

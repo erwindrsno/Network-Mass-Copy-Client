@@ -16,11 +16,18 @@ import com.google.inject.Singleton;
 import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 
+import io.github.cdimascio.dotenv.Dotenv;
+
 public class WebSocketModule extends AbstractModule {
   @Override
   protected void configure() {
-    bind(String.class).annotatedWith(Names.named("host")).toInstance("10.100.70.211");
-    bind(Integer.class).annotatedWith(Names.named("port")).toInstance(8887);
+    Dotenv dotenv = Dotenv.configure().load();
+    bind(Dotenv.class).toInstance(dotenv); // make Dotenv available everywhere
+
+    bind(String.class).annotatedWith(Names.named("host")).toInstance(dotenv.get("WEBSOCKET_SERVER_IP"));
+    bind(Integer.class).annotatedWith(Names.named("port")).toInstance(Integer.parseInt(dotenv.get("PORT")));
+    // bind(String.class).annotatedWith(Names.named("host")).toInstance("10.100.70.211");
+    // bind(Integer.class).annotatedWith(Names.named("port")).toInstance(8887);
     bind(ServerHandler.class).in(Singleton.class);
     bind(FileVerifier.class).in(Singleton.class);
     bind(FileWriter.class).in(Singleton.class);
@@ -41,8 +48,8 @@ public class WebSocketModule extends AbstractModule {
       @Named("port") int port, ServerHandler serverHandler) {
     try {
       // URI uri = new URI("ws://192.168.0.114:8887");
-      URI uri = new URI("ws://10.100.70.211:8887");
-      // URI uri = new URI("ws://" + host + ":" + port);
+      // URI uri = new URI("ws://10.100.70.211:8887");
+      URI uri = new URI("ws://" + host + ":" + port);
       return new Client(uri, serverHandler);
     } catch (Exception e) {
       logger.error(e.getMessage(), e);
